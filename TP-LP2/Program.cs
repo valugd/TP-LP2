@@ -1,4 +1,8 @@
 ﻿using sol_greedy_dinamica;
+using System.Collections.Generic;
+using System.Linq;
+
+using sol_greedy_dinamica;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +11,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
+
+
 
 namespace sol_greedy_dinamica
 {
@@ -23,10 +30,10 @@ namespace sol_greedy_dinamica
     }
 
     //enums 
-    enum eLocalidad { Liniers,3deFebrero, SanMartin, VicenteLopez, LaMatanza, LomasdeZamora, Lanus, Avellaneda, Versalles, VillaLuro, Mataderos, MonteCastro, VelezSarsfield, ParqueAvellaneda, VillaLugano, VillaDevoto, VillaUrquiza, Belgrano, Palermo, Retiro, Caballito, Flores, PuertoMadero, LaBoca, Chacarita };
-    enum eOpcion { se_lleno_completo_, se_lleno_pero_quedaron_cosas_de_la_localidad, no_se_lleno };
-    enum entrega { express, normal, diferido };
-    enum objetos { licuadora = 12, exprimidor = 2, rallador = 1, tostadora = 3, cafetera = 4, molinillos = 1, cocinas = 34, calefon = 10, termotanque = 28, lavarropas = 64, secarropas = 60, heladera = 45, microondas = 15, freezer = 79, computadoras = 7, impresoras = 6, accesorios = 5, telvisores = 11 };
+    public enum eLocalidad { Liniers,3deFebrero, SanMartin, VicenteLopez, LaMatanza, LomasdeZamora, Lanus, Avellaneda, Versalles, VillaLuro, Mataderos, MonteCastro, VelezSarsfield, ParqueAvellaneda, VillaLugano, VillaDevoto, VillaUrquiza, Belgrano, Palermo, Retiro, Caballito, Flores, PuertoMadero, LaBoca, Chacarita };
+    public enum eOpcion { se_lleno_completo_, se_lleno_pero_quedaron_cosas_de_la_localidad, no_se_lleno };
+    public enum entrega { express, normal, diferido };
+    public enum objetos { licuadora = 12, exprimidor = 2, rallador = 1, tostadora = 3, cafetera = 4, molinillos = 1, cocinas = 34, calefon = 10, termotanque = 28, lavarropas = 64, secarropas = 60, heladera = 45, microondas = 15, freezer = 79, computadoras = 7, impresoras = 6, accesorios = 5, telvisores = 11 };
 
     //clases
     public class pedido_por_cliente
@@ -52,18 +59,9 @@ namespace sol_greedy_dinamica
             volumen_total = calculo_volumen_total(compra);
             num_asignado_recorrido = num_asignado_recorrido(barrio_);
             peso_total = calculo_peso_total(compra);
-            distancia_barrio = calcular_distancia_barrio_a_liniers(elocalidad barrioo);
+            distancia_barrio = calcular_distancia_barrio_a_liniers(barrio_);
             entrega_compra = entrega_compra_;
 
-        }
-
-        public ~pedido_por_cliente() { };
-
-        int calcular_distancia_barrio_a_liniers(elocalidad barrioo)
-        {
-            int dist = 0;
-            switch ();
-            return dist;
         }
 
         int calculo_volumen_total(List<objetos> compra)
@@ -72,13 +70,9 @@ namespace sol_greedy_dinamica
             for (int i = 0; i < compra.Count; i++)
             {
                 suma = suma + volumen_elemento(compra[i]); //peso elemento(objeto) le paso un objeto y me devuelve su volumen
-                return suma;
-            }
-        }
 
-        int num_asignado_barrio(eLocalidad localidad)
-        {
-            switch;
+            }
+            return suma;
         }
 
         int calculo_peso_total(List<objetos> compra)
@@ -101,12 +95,12 @@ namespace sol_greedy_dinamica
 internal class Program
 {
     //GREEDY
-    static void solucion_greedy(List<pedido_por_cliente> pedidos_del_dia)
+    static void solucion_greedy(List<pedido_por_cliente> pedidos_del_dia, int[] camiones_del_dia)
     {
 
-        List<pedido_por_cliente> pedidos_del_dia_tipo_de_pedido = Filtrar_por_pedido(pedidos_del_dia_, entrega.express); //filtramos la lista de pedidos total para obtener solo la lista de clientes qeu tienen envio express
+        List<pedido_por_cliente> pedidos_del_dia_tipo_de_pedido = Filtrar_por_pedido(pedidos_del_dia, entrega.express); //filtramos la lista de pedidos total para obtener solo la lista de clientes qeu tienen envio express
         int barrios_a_recorrer = Barrios_en_pedido_del_dia(pedidos_del_dia_tipo_de_pedido); //la cantidad de barrios que tenemos que recorrer para entregar esos pedidos express
-        List<int> orden_clientes = new List<int>[barrios_a_recorrer]; //donde vamos a guardar la lista de los barios en orden de ls barrios que tenemos que recorrer
+        List<int> orden_clientes = new List<int>(); //donde vamos a guardar la lista de los barios en orden de ls barrios que tenemos que recorrer
 
         int[,] matriz = new int[barrios_a_recorrer, barrios_a_recorrer];
         matriz = llenar_matriz_con_distancias(pedidos_del_dia_tipo_de_pedido, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer, esto es para poder hacer el agoritmo de dkjistra
@@ -126,16 +120,16 @@ internal class Program
         }
 
         List<pedido_por_cliente> lista_clientes_filtrada_ordenada = new List<pedido_por_cliente>();
-        lista_clientes_filtrada_ordenada = filtrar_lista(orden_clientes, pedidos_del_dia); //va a filtrar a los clientes y va a dejar a los qe pertencen a los barrios a recorrer, no solo los express, sino tambien los normales y diferidos
-        lista_clientes_filtrada_ordenada.Ordenar_por_pedidio(orden_clientes); //manteniendo el orden de los barrios me los ordena por primero express, despues normal y despues diferido
 
-        int cant_camiones = 0; //empiezo por la camioneta, despues de sus 4 viajes, sigo con el furgon y despues la frgoneta
+        lista_clientes_filtrada_ordenada = Ordenar_por_pedidio(orden_clientes, pedidos_del_dia);
+
+        int cant_camiones = 0;
 
         //meto todo lo que pueda en una camioneta, y despues sigo con la otra camioneta a partir del otro barrio y asi
 
-        while (cant_camiones < 5)
+        while (cant_camiones < camiones_del_dia.Count)
         {
-            llenado_desapacho_productos(orden_clientes, cant_camiones, lista_clientes_filtrada_ordenada); //llena los pedidos en el camion elegido, mientras elimina el barrio recorrido y tambien elimina a los pedidos que se metieron al camion de la lista
+            llenado_despacho_productos(camiones_del_dia[cant_camiones], lista_clientes_filtrada_ordenada); //llena los pedidos en el camion elegido, mientras elimina el barrio recorrido y tambien elimina a los pedidos que se metieron al camion de la lista
             cant_camiones++; //una vez lleno el camion anterior, sigo con el siguiente
         }
 
@@ -143,14 +137,14 @@ internal class Program
     }
 
     //PRGRAMACION DINAMICA
-    static void solucion_dinamica_segundaopcion(List<pedido_por_cliente> pedidos_del_dia_)
+    static void solucion_dinamica_segundaopcion(List<pedido_por_cliente> pedidos_del_dia_, int[] camiones_del_dia)
     {
         //filtramos la lista completa pasada por parametro en listas de las localidades con pedidos express y normales, y los pedidos express y normales
-        List<pedido_por_cliente> pedidos_del_dia_express = Filtrar_por_pedido(pedidos_del_dia, entrega.express);
-        List<localidades> lista_localidades_express = Lista_Barrios_Ordenada(pedidos_del_dia_tipo_de_pedido);
+        List<pedido_por_cliente> pedidos_del_dia_express = Filtrar_por_pedido(pedidos_del_dia_, entrega.express);
+        List<eLocalidad> lista_localidades_express = Lista_Barrios_Ordenada(pedidos_del_dia_express);
 
-        List<pedido_por_cliente> pedidos_del_dia_normales = Filtrar_por_pedido(pedidos_del_dia, entrega.normal);
-        List<localidades> lista_localidades_normal = Lista_Barrios_Ordenada(pedidos_del_dia_tipo_de_pedido);
+        List<pedido_por_cliente> pedidos_del_dia_normales = Filtrar_por_pedido(pedidos_del_dia_, entrega.normal);
+        List<eLocalidad> lista_localidades_normal = Lista_Barrios_Ordenada(pedidos_del_dia_normales);
 
         List<pedido_por_cliente> pedido_a_entregar = new List<pedido_por_cliente>();
 
@@ -159,9 +153,9 @@ internal class Program
 
         //tenemos 5 camiones para usar: 
         // 0: camioneta 1:camioneta 2:camioneta 3:camioneta 4:furgon 5:furgoneta
-        while (cont_camiones < 5 || (lista_localidades_express == null && lista_localidades_normal == null))
+        while (cont_camiones < camiones_del_dia.Count && (lista_localidades_express != null || lista_localidades_normal != null))
         {//hasta que no haya mas camiones o haya despachado todos los productos
-            despacho_de_productos(lista_localidades_normal, pedidos_del_dia_express, pedidos_del_dia_normales, lista_localidades_express, pedido_a_entregar, cont_camiones); //calculo el mejor camino, y despacho todos los paquetes posibles, dandole prioridad a los express
+            despacho_de_productos(lista_localidades_normal, pedidos_del_dia_express, pedidos_del_dia_normales, lista_localidades_express, pedido_a_entregar, camiones_del_dia[cont_camiones]); //calculo el mejor camino, y despacho todos los paquetes posibles, dandole prioridad a los express
             cont_camiones++;//se lleno el camion anterior, uso el siguiente
             pedido_a_entregar.RemoveAll(); //como los vamos entregando, borro la lista porque ya salio el camion
 
@@ -174,6 +168,41 @@ internal class Program
 
 
     //funciones 
+
+
+    static int calcular_distancia_barrio_a_liniers(eLocalidad barrioo)
+    {
+        int dist = 0;
+        switch (barrioo)
+        {
+            case eLocalidad.Liniers: dist = 0; break;
+            case eLocalidad.3deFebrero: dist = 6; break;
+            case eLocalidad.SanMartin: dist = 11; break;
+            case eLocalidad.VicenteLopez: dist = 17; break;
+            case eLocalidad.LaMatanza: dist = 5; break;
+            case eLocalidad.LomasdeZamora: dist = 18; break;
+            case eLocalidad.Lanus: dist = 19; break;
+            case eLocalidad.Avellaneda: dist = 21; break;
+            case eLocalidad.Versalles: dist = 3; break;
+            case eLocalidad.VillaLuro: dist = 2; break;
+            case eLocalidad.Mataderos: dist = 4; break;
+            case eLocalidad.MonteCastro: dist = 7; break;
+            case eLocalidad.VelezSarsfield: dist = 8; break;
+            case eLocalidad.ParqueAvellaneda: dist = 9; break;
+            case eLocalidad.VillaLugano: dist = 10; break;
+            case eLocalidad.VillaDevoto: dist = 12; break;
+            case eLocalidad.VillaUrquiza: dist = 13; break;
+            case eLocalidad.Belgrano: dist = 20; break;
+            case eLocalidad.Palermo: dist = 14; break;
+            case eLocalidad.Retiro: dist = 27; break;
+            case eLocalidad.Caballito: dist = 15; break;
+            case eLocalidad.Flores: dist = 16; break;
+            case eLocalidad.PuertoMadero: dist = 18; break;
+            case eLocalidad.LaBoca: dist = 25; break;
+            case eLocalidad.Chacarita: dist = 23; break;
+        }
+        return dist;
+    }
     static int min_distancia(int[,] matriz, int pos, bool[] verificacion_barrios, int barrios, List<int> orden_clientes)
     {
 
@@ -198,9 +227,11 @@ internal class Program
 
         return min_index;
     }
-    static void despacho_de_productos(List<localidades> lista_localidades_normal, List<pedido_por_cliente> pedidos_del_dia_express, List<pedido_por_cliente> pedidos_del_dia_normales, List<localidades> lista_localidades_express, List<pedido_por_cliente> pedido_a_entregar, int cont_camiones)
+
+    static void despacho_de_productos(List<eLocalidad> lista_localidades_normal, List<pedido_por_cliente> pedidos_del_dia_express, List<pedido_por_cliente> pedidos_del_dia_normales, List<localidades> lista_localidades_express, List<pedido_por_cliente> pedido_a_entregar, int cont_camiones)
     {//las listas de localidades estan ordenadas por orden de menor distancia a liniers a mayor
-        eOpcion chequecamion;
+        eOpcion chequeo_camion_lleno = eOpcion.no_se_lleno;
+        List<int> camino_mas_corto;
 
         if (lista_localidades_express == null) //si no hay mas localidades express, es decir ya recorri todas las express, sigo con los pedidos normales
         {
@@ -208,7 +239,7 @@ internal class Program
             { //mientras que el camion no este lleno o mientras siga habiendo locaclidades que recorrer
                 chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, cont_camiones, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
 
-                if (chequecamion != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
+                if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
                     lista_localidades_normal.RemoveAt(0);
 
             }
@@ -222,7 +253,7 @@ internal class Program
             // algoritmo de Bellman–Held–Karp
             //es un algoritmo de programación dinámica  para resolver el problema del viajante de comercio (TSP), en el que el La entrada es una matriz de distancia entre un conjunto de ciudades, y el objetivo es encontrar un recorrido de duración mínima que visite cada ciudad exactamente una vez antes de regresar al punto de partida. 
             //me va a devolvr ordenado un vector que va a tener a los clientes en el orden que los deberia visitar para hacer el camino mas corto
-            List<int> camino_mas_corto = encontrar_camino_mas_corto(matriz, barrios_a_recorrer);
+            camino_mas_corto = encontrar_camino_mas_corto(matriz, barrios_a_recorrer);
 
 
         }
@@ -234,7 +265,7 @@ internal class Program
 
                 chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, cont_camiones, pedido_a_entregar);
 
-                if (chequecamion != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
+                if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
                     lista_localidades_normal.RemoveAt(0);
 
                 //si despues de poner lo ultimo en el camion de lo express este no se lleno, lo relleno con productos de tipo entrega normal
@@ -248,10 +279,11 @@ internal class Program
 
             matriz = llenar_matriz_con_distancias(pedido_a_entregar, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer
 
-            // algoritmo de Bellman–Held–Karp
-            //es un algoritmo de programación dinámica  para resolver el problema del viajante de comercio (TSP), en el que el La entrada es una matriz de distancia entre un conjunto de ciudades, y el objetivo es encontrar un recorrido de duración mínima que visite cada ciudad exactamente una vez antes de regresar al punto de partida. 
-            //me va a devolvr ordenado un vector que va a tener a los clientes en el orden que los deberia visitar para hacer el camino mas corto
-            List<int> camino_mas_corto = encontrar_camino_mas_corto(matriz, barrios_a_recorrer); //encontramos el camino mas corto para recorrer todos los barrios de los pedidos que entraron en el camion
+            int inicio = barrio_mas_cercano_a_liniers(pedido_a_entregar);//nos va a delvolver el barrio 
+                                                                         // algoritmo de Bellman–Held–Karp
+                                                                         //es un algoritmo de programación dinámica  para resolver el problema del viajante de comercio (TSP), en el que el La entrada es una matriz de distancia entre un conjunto de ciudades, y el objetivo es encontrar un recorrido de duración mínima que visite cada ciudad exactamente una vez antes de regresar al punto de partida. 
+                                                                         //me va a devolvr ordenado un vector que va a tener a los clientes en el orden que los deberia visitar para hacer el camino mas corto
+            camino_mas_corto = encontrar_camino_mas_corto(matriz, barrios_a_recorrer); //encontramos el camino mas corto para recorrer todos los barrios de los pedidos que entraron en el camion
 
 
 
@@ -267,7 +299,7 @@ internal class Program
 
 
     }
-    //funcion que llena el camion seleccionado
+
     static void llenado_despacho_productos(int cant_camion, List<pedido_por_cliente> lista_completa_pedidos)
     {
         //lista pedidos esta fltrada por solo las zonas que estan en el recorrido y primero estan puestos los del envio express, esto lo hacemos desde las funciones en donde llamamos a esta funcion, es por esto que siempre agarramos la posicion 0, porque vamos eliminando al primero despues de meterlo al camion -> siempre el primero de la lista es el que tenemos que meter primero
@@ -331,7 +363,8 @@ internal class Program
             }
         }
     }
-    List<pedido_por_cliente> Filtrar_por_pedido(List<pedido_por_cliente> pedidos_del_dia_, entrega tipo_entrega)
+
+    static List<pedido_por_cliente> Filtrar_por_pedido(List<pedido_por_cliente> pedidos_del_dia_, entrega tipo_entrega)
     {
         List<pedido_por_cliente> aux = new List<pedido_por_cliente>();
 
@@ -343,26 +376,162 @@ internal class Program
         return aux;
     }
 
+    static List<eLocalidad> Lista_Barrios_Ordenada(List<pedido_por_cliente> pedidos_del_dia_tipo_de_pedido)
+    {
 
+        List<eLocalidad> aux = new List<eLocalidad>();
+        //primero meto todos los barrios de todos los pedidos en una lista, no importa si ya puse ese barrio antes
+        for (int i = 0; i < pedidos_del_dia_tipo_de_pedido.Count; i++)
+        {
+            aux.Add(pedidos_del_dia_tipo_de_pedido[i].barrio);
+        }
 
+        //ahora saco los repetidos
+        for (int i = 0; i < pedidos_del_dia_tipo_de_pedido.Count; i++)
+        {
+            for (int j = 1; j < pedidos_del_dia_tipo_de_pedido.Count; j++)
+            {
+                if (aux.ElementAt(i) == aux.ElementAt(j))
+                    aux.RemoveAt(j);
+            }
+        }
 
-    //llenar matriz con distancias -> hacer una funcion que adentro tenga una matriz grande con la distancias a cada barrio desde cada barrio, cuando recibimos los barrios que compraron, agarramos lo que necesitamos de esa matriz para llenar la que vamos a devolver
-    static int[,] llenar_matriz_con_distancias(pedidos_del_dia_tipo_de_pedido, int barrios)
+        //ahora aux tiene la lista de localidades 
+
+        for (int x = 0; x < aux.Count; x++)
+        {
+
+            for (int y = 0; y < aux.Count - 1; y++)
+            {
+
+                // Si el actual es mayor que el que le sigue a la derecha...
+                if (calcular_distancia_barrio_a_liniers(aux.ElementAt(y)) > calcular_distancia_barrio_a_liniers(aux.ElementAt(y + 1)))
+                { //distancia liniers es una funcion que le pasas una localidad y te pasa la distancia de esa localidad a liniers
+                    eLocalidad temporal = aux.ElementAt(y);
+                    aux.Insert(y, aux.ElementAt(y + 1));
+                    aux.Insert(y + 1, temporal);
+                }
+            }
+        }
+        //ahora aux esta ordenado, con el barrio con la distancia minima a liniers en la primer posicion y el barrio mas alejado en la ultima posicion
+        return aux;
+    }
+
+    static List<pedido_por_cliente> Ordenar_por_pedidio(List<int> camino_mas_corto, List<pedido_por_cliente> pedido_a_entregar)
+    {
+        List<pedido_por_cliente> pedidos_ordenados = new List<pedido_por_cliente>();
+        List<pedido_por_cliente> aux = new List<pedido_por_cliente>();
+        for (int i = 0; i < camino_mas_corto.Count; i++)
+        {
+            for (int h = 0; h < pedido_a_entregar.Count; h++)
+            {
+                if (num_asignado_barrio(pedido_a_entregar[h].barrio) == camino_mas_corto[i])
+                    aux.Add(pedido_a_entregar[h]);
+            }
+
+            Ordenar_por_prioridad_pedido(aux);
+
+            for (int n = 0; n < aux.Count; n++)
+            {
+                pedidos_ordenados.Add(aux.ElementAt(n));
+            }
+        }
+        return pedidos_ordenados;
+
+    }
+
+    static int[,] llenar_matriz_con_distancias(List<pedido_por_cliente> pedidos_del_dia_tipo_de_pedido, int barrios)
     {
         //esta es la matriz que ya esta predeterminada, tiene todas las distancias de cada localidad a localidad
         int[,] matriz_definitiva = new int[25, 25];
         //llenamos la matriz
 
         int[,] matriz_distancias = new int[barrios, barrios];
-
+        return matriz_definitiva;
 
     }
 
+    int num_asignado_barrio(eLocalidad localidad)
+    {
+        switch (localidad)
+        {
+            case eLocalidad.Liniers: return 0; break;
+            case eLocalidad.3deFebrero: return 1; break;
+            case eLocalidad.SanMartin: return 2; break;
+            case eLocalidad.VicenteLopez: return 2; break;
+            case eLocalidad.LaMatanza: return 2; break;
+            case eLocalidad.LomasdeZamora: return 2; break;
+            case eLocalidad.Lanus: return 2; break;
+            case eLocalidad.Avellaneda: return 2; break;
+            case eLocalidad.Versalles: return 2; break;
+            case eLocalidad.VillaLuro: return 2; break;
+            case eLocalidad.Mataderos: return 2; break;
+            case eLocalidad.MonteCastro: return 2; break;
+            case eLocalidad.VelezSarsfield: return 2; break;
+            case eLocalidad.ParqueAvellaneda: return 2; break;
+            case eLocalidad.VillaLugano: return 2; break;
+            case eLocalidad.VillaDevoto: return 2; break;
+            case eLocalidad.VillaUrquiza: return 2; break;
+            case eLocalidad.Belgrano: return 2; break;
+            case eLocalidad.Palermo: return 2; break;
+            case eLocalidad.Retiro: return 2; break;
+            case eLocalidad.Caballito: return 2; break;
+            case eLocalidad.Flores: return 2; break;
+            case eLocalidad.PuertoMadero: return 2; break;
+            case eLocalidad.LaBoca: return 2; break;
+            case eLocalidad.Chacarita: return 2; break;
+        }
+        return -1;
+    }
+
+    //revisar
+    static List<int> encontrar_camino_mas_corto(int[,] matriz, int barrios_a_recorrer)
+    {
+        //al poner al ultimo y primero barrio como liners, va a partir de liniers, ir por todos los nodos y volver a liniers
+        // hay que reflejar eso en la matriz, poniendo dos veces liniers, es decir, poner que el barrio 0 y bario ultimo sean liniers
+
+        int indice = barrios_a_recorrer + 2;//tengo que volver a liniers, el indicie es la cantidad de movimientos que tengo q hacer para llegar al nodo final
+
+        int min = Constants.max_index;
+        List<int> camino = new List<int>();
+        int[] costo = new int[barrios_a_recorrer + 2];
+        int[] distancia = new int[barrios_a_recorrer + 2];
 
 
+        //inicializo costo
+        for (int i = 1; i < barrios_a_recorrer + 2; i++)
+        {
+            costo[i] = 0;
+        }
+        costo[barrios_a_recorrer + 1] = matriz[0][barrios_a_recorrer + 1]; //pongo la distancia del ultimo barrio (mas alejado de liniers) a liniers
+
+        for (int i = (barrios_a_recorrer + 1) - 1; i >= 1; i--) //empezamos desde el ultimo barrio
+        {
+            min = Constants.max_index;
+            for (int k = i + 1; k <= (barrios_a_recorrer + 1); k++)
+            {
+                if (matriz[i][k] != 0 && matriz[i][k] + costo[k] < min) //calcula la distancia minima de ir de nodo a nodo, fijandose por todos los caminos posibles pero verificando de no
+                {
+                    min = matriz[i][k] + costo[k];
+                    distancia[i] = k;
+                }
+            }
+            costo[i] = min; //me quedo con el miinimo costo de todos los caminos
+        }
+
+        //empiezo y termino en liniers, el primer y ultimo barrio va a ser liniers
+        camino.Add(0);//empiezo siempre desde el barrio 0
 
 
+        for (int i = 2; i <= indice - 1; i++)//en distancia yo hbaia guardado los subindices, ahora se los asigno en orden a la lista del camino
+        {
+            camino.Add(distancia[camino.ElementAt(i - 1)]);
+        }
+        //en la lista va a aparecer que el primer barrio de donde parte es liniers siempre y el ultimo barrio al que vuelve es liniers tambien
+        camino.Add(0);
 
+        return camino;
+    }
 
     static eOpcion intento_llenar_camion(eLocalidad localidad, List<pedido_por_cliente> pedidos_del_dia, int cont_camiones, List<pedido_por_cliente> pedido_a_entregar)
     {
@@ -461,12 +630,9 @@ internal class Program
 
 
     }
-}
 
+    static void Main(string[] args)
+    {
 
-static void Main(string[] args)
-{
-
-}
-    
+    }
 }
