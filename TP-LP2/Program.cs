@@ -1,11 +1,7 @@
 ﻿using sol_greedy_dinamica;
 using System.Collections.Generic;
 using System.Linq;
-
-using sol_greedy_dinamica;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -26,40 +22,89 @@ namespace sol_greedy_dinamica
         public const int VOLUMEN_FURGON = 3092; //CAMBIAR POR VALOR REAL
         public const int VOLUMEN_FURGONETA = 1233;//CAMBIAR POR VALOR REAL
         public const int max_index = 10000;
+        public const int volumen_electro_pequeños = 50; //cambiar volumen real
+        public const int volumen_linea_blanca = 50; //cambiar volumen real
+        public const int volumen_electronicos = 50; //cambiar volumen real
+        public const int televisores = 50; //cambiar volumen real
+        public const int volumen_elevador = 50; //cambiar volumen real
+        public const int peso_elevador = 50; //cambiar volumen real
 
     }
 
     //enums 
-    public enum eLocalidad { Liniers,3deFebrero, SanMartin, VicenteLopez, LaMatanza, LomasdeZamora, Lanus, Avellaneda, Versalles, VillaLuro, Mataderos, MonteCastro, VelezSarsfield, ParqueAvellaneda, VillaLugano, VillaDevoto, VillaUrquiza, Belgrano, Palermo, Retiro, Caballito, Flores, PuertoMadero, LaBoca, Chacarita };
+    public enum eLocalidad { Liniers, TresdeFebrero, SanMartin, VicenteLopez, LaMatanza, LomasdeZamora, Lanus, Avellaneda, Versalles, VillaLuro, Mataderos, MonteCastro, VelezSarsfield, ParqueAvellaneda, VillaLugano, VillaDevoto, VillaUrquiza, Belgrano, Palermo, Retiro, Caballito, Flores, PuertoMadero, LaBoca, Chacarita };
     public enum eOpcion { se_lleno_completo_, se_lleno_pero_quedaron_cosas_de_la_localidad, no_se_lleno };
     public enum entrega { express, normal, diferido };
-    public enum objetos { licuadora = 12, exprimidor = 2, rallador = 1, tostadora = 3, cafetera = 4, molinillos = 1, cocinas = 34, calefon = 10, termotanque = 28, lavarropas = 64, secarropas = 60, heladera = 45, microondas = 15, freezer = 79, computadoras = 7, impresoras = 6, accesorios = 5, telvisores = 11 };
+    public enum objetos { licuadora, exprimidor, rallador, tostadora, cafetera, molinillos, cocinas, calefon, termotanque, lavarropas, secarropas, heladera, microondas, freezer, computadoras, impresoras, accesorios, telvisores };
+
+    public enum eTipoProducto { linea_blanca, pequeños_electrodomesticos, electronicos, televisores }
 
     //clases
     public class pedido_por_cliente
     {
         //atributos
-        string nombre;
+        string nombre_cliente;
+        public string nombre
+        {
+            get { return nombre_cliente; }
+        }
+        eTipoProducto tipo_producto_compra;
+        public eTipoProducto tipo_producto
+        {
+            get { return tipo_producto_compra; }
+        }
         List<objetos> compra;
+        public List<objetos> compra_objetos
+        {
+            get { return compra; }
+        }
         int cant_de_objetos;
-        eLocalidad barrio;
-        int distancia_barrio;
-        int peso_total;
-        int volumen_total;
-        int num_asignado_recorrido;
-        const int id_compra;
-        entrega entrega_compra;
+        public int cantidad_objetos
+        {
+            get { return cant_de_objetos; }
+        }
+        eLocalidad barrio_a_entregar;
+        public eLocalidad barrio
+        {
+            get { return barrio_a_entregar; }
+        }
 
+        int peso_total;
+        public int peso_pedido
+        {
+            get { return peso_total; }
+        }
+        public int peso_pedido_set
+        {
+            set { }
+        }
+        int volumen_total;
+        public int volumen
+        {
+            get { return volumen_total; }
+        }
+        public int volumen_pedido_set
+        {
+            set { }
+        }
+        int id_compra;
+        public int id_cliente
+        {
+            get { return id_compra; }
+        }
+        entrega entrega_compra;
+        public entrega tipo_entrega
+        {
+            get { return entrega_compra; }
+        }
         //metodos
         public pedido_por_cliente(string nombre_, eLocalidad barrio_, int peso_total_, entrega entrega_compra_)//ver del cuaderno de progra1 cmo era lo de id
         {
-            nombre = nombre_;
-            barrio = barrio_;
+            nombre_cliente = nombre_;
+            barrio_a_entregar = barrio_;
             compra = new List<objetos>();
             volumen_total = calculo_volumen_total(compra);
-            num_asignado_recorrido = num_asignado_recorrido(barrio_);
             peso_total = calculo_peso_total(compra);
-            distancia_barrio = calcular_distancia_barrio_a_liniers(barrio_);
             entrega_compra = entrega_compra_;
 
         }
@@ -74,7 +119,23 @@ namespace sol_greedy_dinamica
             }
             return suma;
         }
-
+        int volumen_elemento(objetos obj)
+        {
+            if (obj == objetos.licuadora || obj == objetos.exprimidor || obj == objetos.rallador || obj == objetos.tostadora || obj == objetos.cafetera || obj == objetos.molinillos)
+            {
+                return Constants.volumen_electro_pequeños;
+            }
+            else if (obj == objetos.cocinas || obj == objetos.calefon || obj == objetos.termotanque || obj == objetos.lavarropas || obj == objetos.secarropas || obj == objetos.heladera || obj == objetos.microondas || obj == objetos.freezer)
+            {
+                return Constants.volumen_linea_blanca;
+            }
+            else if (obj == objetos.computadoras || obj == objetos.impresoras || obj == objetos.accesorios)
+            {
+                return Constants.volumen_electronicos;
+            }
+            else
+                return Constants.televisores;
+        }
         int calculo_peso_total(List<objetos> compra)
         {
             int suma = 0;
@@ -84,12 +145,76 @@ namespace sol_greedy_dinamica
             }
             return suma;
         }
+        int peso_elemento(objetos obj)
+        {
+            int peso = 0;
+            switch (obj)
+            {
+                case objetos.licuadora:
+                    peso = 12;
+                    break;
+                case objetos.exprimidor:
+                    peso = 2;
+                    break;
+                case objetos.rallador:
+                    peso = 1;
+                    break;
+                case objetos.tostadora:
+                    peso = 3;
+                    break;
+                case objetos.cafetera:
+                    peso = 4;
+                    break;
+                case objetos.molinillos:
+                    peso = 1;
+                    break;
+                case objetos.cocinas:
+                    peso = 34;
+                    break;
+                case objetos.calefon:
+                    peso = 10;
+                    break;
+                case objetos.termotanque:
+                    peso = 28;
+                    break;
+                case objetos.lavarropas:
+                    peso = 64;
+                    break;
+                case objetos.secarropas:
+                    peso = 60;
+                    break;
+                case objetos.heladera:
+                    peso = 45;
+                    break;
+                case objetos.microondas:
+                    peso = 15;
+                    break;
+                case objetos.freezer:
+                    peso = 79;
+                    break;
+                case objetos.computadoras:
+                    peso = 7;
+                    break;
+                case objetos.impresoras:
+                    peso = 6;
+                    break;
+                case objetos.accesorios:
+                    peso = 5;
+                    break;
+                case objetos.telvisores:
+                    peso = 11;
+                    break;
+            }
+            return peso;
 
-
+        }
     }
 
+    
 
 }
+
+
 
 
 internal class Program
@@ -127,7 +252,7 @@ internal class Program
 
         //meto todo lo que pueda en una camioneta, y despues sigo con la otra camioneta a partir del otro barrio y asi
 
-        while (cant_camiones < camiones_del_dia.Count)
+        while (cant_camiones < camiones_del_dia.Length)
         {
             llenado_despacho_productos(camiones_del_dia[cant_camiones], lista_clientes_filtrada_ordenada); //llena los pedidos en el camion elegido, mientras elimina el barrio recorrido y tambien elimina a los pedidos que se metieron al camion de la lista
             cant_camiones++; //una vez lleno el camion anterior, sigo con el siguiente
@@ -153,11 +278,11 @@ internal class Program
 
         //tenemos 5 camiones para usar: 
         // 0: camioneta 1:camioneta 2:camioneta 3:camioneta 4:furgon 5:furgoneta
-        while (cont_camiones < camiones_del_dia.Count && (lista_localidades_express != null || lista_localidades_normal != null))
+        while (cont_camiones < camiones_del_dia.Length && (lista_localidades_express != null || lista_localidades_normal != null))
         {//hasta que no haya mas camiones o haya despachado todos los productos
             despacho_de_productos(lista_localidades_normal, pedidos_del_dia_express, pedidos_del_dia_normales, lista_localidades_express, pedido_a_entregar, camiones_del_dia[cont_camiones]); //calculo el mejor camino, y despacho todos los paquetes posibles, dandole prioridad a los express
             cont_camiones++;//se lleno el camion anterior, uso el siguiente
-            pedido_a_entregar.RemoveAll(); //como los vamos entregando, borro la lista porque ya salio el camion
+            pedido_a_entregar.RemoveRange(0, pedido_a_entregar.Count); //como los vamos entregando, borro la lista porque ya salio el camion
 
         }
 
@@ -168,7 +293,53 @@ internal class Program
 
 
     //funciones 
+    static int chequeo_verificacion_barrios(bool[] verificacion_barrios)
+    {
+        // devuelve -> 1 si llegaste al final (todos los barrios fueron recorridos), 0 si no llegaste al final (falta mas de un barrio por recorrer) y -1 si falta un barrio (solo falta un barrio por recorrer)
 
+        int cont = 0;
+        for (int i = 0; i < verificacion_barrios.Length; i++)
+        {
+            if (verificacion_barrios[i] == false)
+                cont++;
+        }
+        if (cont == 0)
+            return 1; //todos los barrios fueron recorridos
+        else if (cont == 1)
+            return -1; //solo falta un barrio
+        else
+            return 0; //falta mas de un barrio por recorrer
+    }
+
+    static int Barrios_en_pedido_del_dia(List<pedido_por_cliente> lista_pedido)
+    {
+        List<pedido_por_cliente> aux = new List<pedido_por_cliente>();
+        for (int i = 0; i < lista_pedido.Count; i++)
+        {
+            aux.Add(lista_pedido.ElementAt(0));
+        }
+
+        int cont = 0;
+        bool flag = false;
+
+        for (int i = 0; i < lista_pedido.Count; i++)
+        {
+            flag = false;
+            for (int h = i + 1; h < lista_pedido.Count; h++)
+            {//cuento solo una vez (con ayuda del flag) al barrio y todos los clientes que encuentre que van al mismo barrio los elimino de la lista auxiliar
+                //notar que la lista original no se modifica, solo la auxiliar
+                if (aux[i].barrio == aux[h].barrio && flag == false)
+                {
+                    flag = true;
+                    aux.RemoveAt(h);
+                    cont++;
+                }
+                else if (aux[i].barrio == aux[h].barrio)
+                    aux.RemoveAt(h);
+            }
+        }
+        return cont;
+    }
 
     static int calcular_distancia_barrio_a_liniers(eLocalidad barrioo)
     {
@@ -176,7 +347,7 @@ internal class Program
         switch (barrioo)
         {
             case eLocalidad.Liniers: dist = 0; break;
-            case eLocalidad.3deFebrero: dist = 6; break;
+            case eLocalidad.TresdeFebrero: dist = 6; break;
             case eLocalidad.SanMartin: dist = 11; break;
             case eLocalidad.VicenteLopez: dist = 17; break;
             case eLocalidad.LaMatanza: dist = 5; break;
@@ -203,6 +374,7 @@ internal class Program
         }
         return dist;
     }
+
     static int min_distancia(int[,] matriz, int pos, bool[] verificacion_barrios, int barrios, List<int> orden_clientes)
     {
 
@@ -228,7 +400,7 @@ internal class Program
         return min_index;
     }
 
-    static void despacho_de_productos(List<eLocalidad> lista_localidades_normal, List<pedido_por_cliente> pedidos_del_dia_express, List<pedido_por_cliente> pedidos_del_dia_normales, List<localidades> lista_localidades_express, List<pedido_por_cliente> pedido_a_entregar, int cont_camiones)
+    static void despacho_de_productos(List<eLocalidad> lista_localidades_normal, List<pedido_por_cliente> pedidos_del_dia_express, List<pedido_por_cliente> pedidos_del_dia_normales, List<eLocalidad> lista_localidades_express, List<pedido_por_cliente> pedido_a_entregar, int cont_camiones)
     {//las listas de localidades estan ordenadas por orden de menor distancia a liniers a mayor
         eOpcion chequeo_camion_lleno = eOpcion.no_se_lleno;
         List<int> camino_mas_corto;
@@ -279,10 +451,9 @@ internal class Program
 
             matriz = llenar_matriz_con_distancias(pedido_a_entregar, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer
 
-            int inicio = barrio_mas_cercano_a_liniers(pedido_a_entregar);//nos va a delvolver el barrio 
-                                                                         // algoritmo de Bellman–Held–Karp
-                                                                         //es un algoritmo de programación dinámica  para resolver el problema del viajante de comercio (TSP), en el que el La entrada es una matriz de distancia entre un conjunto de ciudades, y el objetivo es encontrar un recorrido de duración mínima que visite cada ciudad exactamente una vez antes de regresar al punto de partida. 
-                                                                         //me va a devolvr ordenado un vector que va a tener a los clientes en el orden que los deberia visitar para hacer el camino mas corto
+            // algoritmo de Bellman–Held–Karp
+            //es un algoritmo de programación dinámica  para resolver el problema del viajante de comercio (TSP), en el que el La entrada es una matriz de distancia entre un conjunto de ciudades, y el objetivo es encontrar un recorrido de duración mínima que visite cada ciudad exactamente una vez antes de regresar al punto de partida. 
+            //me va a devolvr ordenado un vector que va a tener a los clientes en el orden que los deberia visitar para hacer el camino mas corto
             camino_mas_corto = encontrar_camino_mas_corto(matriz, barrios_a_recorrer); //encontramos el camino mas corto para recorrer todos los barrios de los pedidos que entraron en el camion
 
 
@@ -311,11 +482,11 @@ internal class Program
         {//las camionetas no tiene limite de peso, solo de volumen
             while (volumen_aux < Constants.VOLUMEN_CAMIONETA) //mientras que el volumen que tiene sea menor que el max de la camioneta
             {
-                if (volumen_aux + lista_completa_pedidos[0].volumentotal <= Constants.VOLUMEN_CAMIONETA) //cheque que si le sumo el paquete siguiente no supere el volumen total.
+                if (volumen_aux + lista_completa_pedidos[0].volumen <= Constants.VOLUMEN_CAMIONETA) //cheque que si le sumo el paquete siguiente no supere el volumen total.
                 {
                     pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]); //lo agregamos a la cola
                     lista_completa_pedidos.RemoveAt(0); //sacamos a ese pedido de la lista
-                    volumen_aux = volumen_aux + lista_completa_pedidos[0].volumentotal; //sumamos el volumen
+                    volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen; //sumamos el volumen
                 }
                 else
                     volumen_aux = Constants.VOLUMEN_CAMIONETA;//si ya sumandole el prox paquete, supero el peso del camion, le impongo que el peso es el max para que salga del while
@@ -326,12 +497,12 @@ internal class Program
         {//en este caso chequeamos tanto el volumen total y el peso total 
             while (volumen_aux < Constants.VOLUMEN_FURGON && peso_aux < Constants.PESOMAXFURGON)
             {
-                if (volumen_aux + lista_completa_pedidos[0].volumentotal < Constants.VOLUMEN_FURGON && (peso_aux + lista_completa_pedidos[0].pesototal) < Constants.PESOMAXFURGON)
+                if (volumen_aux + lista_completa_pedidos[0].volumen < Constants.VOLUMEN_FURGON && (peso_aux + lista_completa_pedidos[0].peso_pedido) < Constants.PESOMAXFURGON)
                 {
                     pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]);
                     lista_completa_pedidos.RemoveAt(0);
-                    volumen_aux = volumen_aux + lista_completa_pedidos[0].volumentotal;
-                    peso_aux = peso_aux + lista_completa_pedidos[0].peso;
+                    volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen;
+                    peso_aux = peso_aux + lista_completa_pedidos[0].peso_pedido;
                 }
                 else
                 {
@@ -346,12 +517,12 @@ internal class Program
         {//en este caso chequeamos tanto el volumen total y el peso total
             while (volumen_aux < Constants.VOLUMEN_FURGONETA && peso_aux < Constants.PESOMAXFURGONETA)
             {
-                if (volumen_aux + lista_completa_pedidos[0].volumentotal < Constants.VOLUMEN_FURGONETA && (peso_aux + lista_completa_pedidos[0].pesototal) < Constants.PESOMAXFURGONETA)
+                if (volumen_aux + lista_completa_pedidos[0].volumen < Constants.VOLUMEN_FURGONETA && (peso_aux + lista_completa_pedidos[0].peso_pedido) < Constants.PESOMAXFURGONETA)
                 {
                     pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]);
                     lista_completa_pedidos.RemoveAt(0);
-                    volumen_aux = volumen_aux + lista_completa_pedidos[0].volumentotal;
-                    peso_aux = peso_aux + lista_completa_pedidos[0].peso;
+                    volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen;
+                    peso_aux = peso_aux + lista_completa_pedidos[0].peso_pedido;
                 }
                 else
                 {
@@ -370,7 +541,7 @@ internal class Program
 
         for (int i = 0; i < pedidos_del_dia_.Count; i++)
         {
-            if (pedidos_del_dia_[i].entrega_compra == tipo_entrega)
+            if (pedidos_del_dia_[i].tipo_entrega == tipo_entrega)
                 aux.Add(pedidos_del_dia_[i]);
         }
         return aux;
@@ -421,6 +592,7 @@ internal class Program
     {
         List<pedido_por_cliente> pedidos_ordenados = new List<pedido_por_cliente>();
         List<pedido_por_cliente> aux = new List<pedido_por_cliente>();
+
         for (int i = 0; i < camino_mas_corto.Count; i++)
         {
             for (int h = 0; h < pedido_a_entregar.Count; h++)
@@ -451,35 +623,35 @@ internal class Program
 
     }
 
-    int num_asignado_barrio(eLocalidad localidad)
+    static int num_asignado_barrio(eLocalidad localidad)
     {
         switch (localidad)
         {
-            case eLocalidad.Liniers: return 0; break;
-            case eLocalidad.3deFebrero: return 1; break;
-            case eLocalidad.SanMartin: return 2; break;
-            case eLocalidad.VicenteLopez: return 2; break;
-            case eLocalidad.LaMatanza: return 2; break;
-            case eLocalidad.LomasdeZamora: return 2; break;
-            case eLocalidad.Lanus: return 2; break;
-            case eLocalidad.Avellaneda: return 2; break;
-            case eLocalidad.Versalles: return 2; break;
-            case eLocalidad.VillaLuro: return 2; break;
-            case eLocalidad.Mataderos: return 2; break;
-            case eLocalidad.MonteCastro: return 2; break;
-            case eLocalidad.VelezSarsfield: return 2; break;
-            case eLocalidad.ParqueAvellaneda: return 2; break;
-            case eLocalidad.VillaLugano: return 2; break;
-            case eLocalidad.VillaDevoto: return 2; break;
-            case eLocalidad.VillaUrquiza: return 2; break;
-            case eLocalidad.Belgrano: return 2; break;
-            case eLocalidad.Palermo: return 2; break;
-            case eLocalidad.Retiro: return 2; break;
-            case eLocalidad.Caballito: return 2; break;
-            case eLocalidad.Flores: return 2; break;
-            case eLocalidad.PuertoMadero: return 2; break;
-            case eLocalidad.LaBoca: return 2; break;
-            case eLocalidad.Chacarita: return 2; break;
+            case eLocalidad.Liniers: return 0;
+            case eLocalidad.TresdeFebrero: return 1;
+            case eLocalidad.SanMartin: return 2;
+            case eLocalidad.VicenteLopez: return 2;
+            case eLocalidad.LaMatanza: return 2;
+            case eLocalidad.LomasdeZamora: return 2;
+            case eLocalidad.Lanus: return 2;
+            case eLocalidad.Avellaneda: return 2;
+            case eLocalidad.Versalles: return 2;
+            case eLocalidad.VillaLuro: return 2;
+            case eLocalidad.Mataderos: return 2;
+            case eLocalidad.MonteCastro: return 2;
+            case eLocalidad.VelezSarsfield: return 2;
+            case eLocalidad.ParqueAvellaneda: return 2;
+            case eLocalidad.VillaLugano: return 2;
+            case eLocalidad.VillaDevoto: return 2;
+            case eLocalidad.VillaUrquiza: return 2;
+            case eLocalidad.Belgrano: return 2;
+            case eLocalidad.Palermo: return 2;
+            case eLocalidad.Retiro: return 2;
+            case eLocalidad.Caballito: return 2;
+            case eLocalidad.Flores: return 2;
+            case eLocalidad.PuertoMadero: return 2;
+            case eLocalidad.LaBoca: return 2;
+            case eLocalidad.Chacarita: return 2;
         }
         return -1;
     }
@@ -503,16 +675,16 @@ internal class Program
         {
             costo[i] = 0;
         }
-        costo[barrios_a_recorrer + 1] = matriz[0][barrios_a_recorrer + 1]; //pongo la distancia del ultimo barrio (mas alejado de liniers) a liniers
+        costo[barrios_a_recorrer + 1] = matriz[0, barrios_a_recorrer + 1]; //pongo la distancia del ultimo barrio (mas alejado de liniers) a liniers
 
         for (int i = (barrios_a_recorrer + 1) - 1; i >= 1; i--) //empezamos desde el ultimo barrio
         {
             min = Constants.max_index;
             for (int k = i + 1; k <= (barrios_a_recorrer + 1); k++)
             {
-                if (matriz[i][k] != 0 && matriz[i][k] + costo[k] < min) //calcula la distancia minima de ir de nodo a nodo, fijandose por todos los caminos posibles pero verificando de no
+                if (matriz[i, k] != 0 && matriz[i, k] + costo[k] < min) //calcula la distancia minima de ir de nodo a nodo, fijandose por todos los caminos posibles pero verificando de no
                 {
-                    min = matriz[i][k] + costo[k];
+                    min = matriz[i, k] + costo[k];
                     distancia[i] = k;
                 }
             }
@@ -535,6 +707,7 @@ internal class Program
 
     static eOpcion intento_llenar_camion(eLocalidad localidad, List<pedido_por_cliente> pedidos_del_dia, int cont_camiones, List<pedido_por_cliente> pedido_a_entregar)
     {
+        bool flag_elevador = false;
         //llena el camion con los pedidos de la locacalidad pasada como paremetro, si logra llenar con todos los pedidos de la localidad y sigue habiendo espacio, devuelve que no se lleno. Si logra poner TODOS los pedidos de la localidad y no queda espacio, es decir, el volumen que ya lleno el camion es igual o mayor que el volumen total sin la caja mas pequeña de entrega entonces devuelvo que se llenó completo
         //si mientras lo lleno hay un pedido que no puedo meter de la locaclidad porque ya superaria el peso o volumen total del camion, devuelvo que se lleno pero que quedaron cosas de la locacalidad sin poner. Igualmente, auqnue no va a poner el pedido que agregandolo superaria el volumen/peso maximo va a seguir buscando a ver si puede meter otro pedido de menor volumen o peso al camion
         //de esta manera, el camion siempre va a salir lo mas lleno posible
@@ -544,20 +717,31 @@ internal class Program
         int peso_aux = 0;
 
         //camion elegido -> camioneta
-        if (cont_camiones == 0 || cont_camiones == 1 || ont_camiones == 2 || cont_camiones == 3)
+        if (cont_camiones == 0 || cont_camiones == 1 || cont_camiones == 2 || cont_camiones == 3)
         {
 
-            int cont = 0;
+
             for (int i = 0; i < pedidos_del_dia.Count; i++)//recorro toda la lista 
             {
                 if (volumen_aux < Constants.VOLUMEN_CAMIONETA) //si el volumen que voy sumando de los productos que voy metiendo al camion no supera al volumen total, mismo pensamiento con el peso
                 {
-                    if ((volumen_aux + pedidos_del_dia[i].volumen_total) < Constants.VOLUMEN_CAMIONETA && pedidos_del_dia[i].barrio == localidad)
+                    if ((volumen_aux + pedidos_del_dia[i].volumen) < Constants.VOLUMEN_CAMIONETA && pedidos_del_dia[i].barrio == localidad)
                     {
-                        pedido_a_entregar.Add(pedidos_del_dia[i]);//agrego el pedido a la lista de pedidos que entraron en el camion
-                        pedidos_del_dia.RemoveAt(i); //lo elimino de la lista completa
-                        volumen_aux = volumen_aux + pedidos_del_dia[i].volumen_total;
-                        peso_aux = peso_aux + pedidos_del_dia[i].peso_total;
+                        if (Verifical_electro_pequeño(pedidos_del_dia[i]) == true && flag_elevador == false)
+                        {
+                            volumen_aux = volumen_aux + pedidos_del_dia[i].volumen + Constants.volumen_elevador;
+                            peso_aux = peso_aux + pedidos_del_dia[i].peso_pedido + Constants.peso_elevador;
+                            pedido_a_entregar.Add(pedidos_del_dia[i]);
+                            pedidos_del_dia.RemoveAt(i);
+                            flag_elevador = true;
+                        }
+                        else
+                        {
+                            volumen_aux = volumen_aux + pedidos_del_dia[i].volumen;
+                            peso_aux = peso_aux + pedidos_del_dia[i].peso_pedido;
+                            pedido_a_entregar.Add(pedidos_del_dia[i]);
+                            pedidos_del_dia.RemoveAt(i);
+                        }
                     }
                     else if (pedidos_del_dia[i].barrio == localidad) //si no entra en el camion pero es de la localidad, siginifica que ya va ahaber un paquete que no voy a meter que va a estra en el prox camion 
                     {
@@ -566,70 +750,163 @@ internal class Program
                     }
                 }
             }
-            if (volumen_aux >= (Constants.VOLUMEN_CAMIONETA - Constants.volumen_linea_blanca) && flag == false) //si no queda mucho espacio , ni siquiera para que entre una pedido chico mas y aparte nunca estuvo en la situcion de que no entro un pedido de la localidad
+            if (volumen_aux >= (Constants.VOLUMEN_CAMIONETA - Constants.volumen_electro_pequeños) && flag == false) //si no queda mucho espacio , ni siquiera para que entre una pedido chico mas y aparte nunca estuvo en la situcion de que no entro un pedido de la localidad
                 estado = eOpcion.se_lleno_completo_;
 
             return estado;
         }
         else if (cont_camiones == 4) // camion elegido->furgon
         {
-            int cont = 0;
+
             for (int i = 0; i < pedidos_del_dia.Count; i++)
             {
                 if (volumen_aux < Constants.VOLUMEN_FURGON && peso_aux < Constants.PESOMAXFURGON)
                 {
-                    if ((volumen_aux + pedidos_del_dia[i].volumen_total) < Constants.VOLUMEN_FURGON && (peso_aux + pedidos_del_dia[i].peso_total) < Constants.PESOMAXFURGON && pedidos_del_dia[i].barrio == localidad)
+                    if ((volumen_aux + pedidos_del_dia[i].volumen) < Constants.VOLUMEN_FURGON && (peso_aux + pedidos_del_dia[i].peso_pedido) < Constants.PESOMAXFURGON && pedidos_del_dia[i].barrio == localidad)
                     {
-                        pedido_a_entregar.Add(pedidos_del_dia[i]);
-                        pedidos_del_dia.RemoveAt(i);
-                        volumen_aux = volumen_aux + pedidos_del_dia[i].volumen_total;
-                        peso_aux = peso_aux + pedidos_del_dia[i].peso_total;
-                    }
-                    else if (pedidos_del_dia[i].barrio == localidad) //si no entra en el camion pero es de la localidad 
-                    {
-                        flag = 1;
-                        estado = eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad;
-                    }
-                }
-            }
-            if (volumen_aux >= (Constants.VOLUMEN_CAMIONETA - Constants.volumen_linea_blanca) && flag == false) //si el camion se lleno y no tuvo problema de que no entro algo de la localidad
-                estado = eOpcion.se_lleno_completo_;
+                        if (Cantidad_Televisores(pedidos_del_dia[i]) > 0)
+                        {
+                            pedidos_del_dia[i].volumen_pedido_set = pedidos_del_dia[i].volumen - Constants.televisores; //le restamos el volumen del televisor al volumen total del pedido
+                            int nuevo_volumen = 2 * 1 * 4; //ancho y profundidad del televisor pero alto del furgon
+                            pedidos_del_dia[i].volumen_pedido_set = pedidos_del_dia[i].volumen + nuevo_volumen;
+                            //una vez que ya esta actualizado el nuevo volumen, sigo como el resto de los pedidos sin televisor
+                        }
 
-            return estado;
+                        if (Verifical_electro_pequeño(pedidos_del_dia[i]) == true && flag_elevador == false)
+                        {
+                            volumen_aux = volumen_aux + pedidos_del_dia[i].volumen + Constants.volumen_elevador;
+                            peso_aux = peso_aux + pedidos_del_dia[i].peso_pedido + Constants.peso_elevador;
+                            pedido_a_entregar.Add(pedidos_del_dia[i]);
+                            pedidos_del_dia.RemoveAt(i);
+                            flag_elevador = true;
+                        }
+                        else
+                        {
+                            volumen_aux = volumen_aux + pedidos_del_dia[i].volumen;
+                            peso_aux = peso_aux + pedidos_del_dia[i].peso_pedido;
+                            pedido_a_entregar.Add(pedidos_del_dia[i]);
+                            pedidos_del_dia.RemoveAt(i);
+                        }
+                    }
+
+
+                }
+                else if (pedidos_del_dia[i].barrio == localidad) //si no entra en el camion pero es de la localidad 
+                {
+                    flag = true;
+                    estado = eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad;
+                }
+
+
+
+                if (volumen_aux >= (Constants.VOLUMEN_CAMIONETA - Constants.volumen_electro_pequeños) && flag == false) //si el camion se lleno y no tuvo problema de que no entro algo de la localidad
+                    estado = eOpcion.se_lleno_completo_;
+
+                return estado;
+            }
         }
         else //se elegio la furgoneta
         {
-            int cont = 0;
+
             for (int i = 0; i < pedidos_del_dia.Count; i++)
             {
                 if (volumen_aux < Constants.VOLUMEN_FURGONETA && peso_aux < Constants.PESOMAXFURGONETA)
                 {
-                    if ((volumen_aux + pedidos_del_dia[i].volumen_total) < Constants.VOLUMEN_FURGONETA && (peso_aux + pedidos_del_dia[i].peso_total) < Constants.PESOMAXFURGONETA && pedidos_del_dia[i].barrio == localidad)
+                    if ((volumen_aux + pedidos_del_dia[i].volumen) < Constants.VOLUMEN_FURGONETA && (peso_aux + pedidos_del_dia[i].peso_pedido) < Constants.PESOMAXFURGONETA && pedidos_del_dia[i].barrio == localidad)
                     {
+                        if (Cantidad_Televisores(pedidos_del_dia[i]) > 0)
+                        {
+                            pedidos_del_dia[i].volumen_pedido_set = pedidos_del_dia[i].volumen - Constants.televisores; //le restamos el volumen del televisor al volumen total del pedido
+                            int nuevo_volumen = 2 * 1 * 3; //ancho y profundidad del televisor pero alto del furgoneta
+                            pedidos_del_dia[i].volumen_pedido_set = pedidos_del_dia[i].volumen + nuevo_volumen;
+                            //una vez que ya esta actualizado el nuevo volumen, sigo como el resto de los pedidos sin televisor
+                        }
+
+                        volumen_aux = volumen_aux + pedidos_del_dia[i].volumen;
+                        peso_aux = peso_aux + pedidos_del_dia[i].peso_pedido;
                         pedido_a_entregar.Add(pedidos_del_dia[i]);
                         pedidos_del_dia.RemoveAt(i);
-                        volumen_aux = volumen_aux + pedidos_del_dia[i].volumen_total;
-                        peso_aux = peso_aux + pedidos_del_dia[i].peso_total;
+
                     }
                     else if (pedidos_del_dia[i].barrio == localidad) //si no entra en el camion pero es de la localidad 
                     {
-                        flag = 1;
+                        flag = true;
                         estado = eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad;
                     }
                 }
             }
-            if (volumen_aux >= (Constants.VOLUMEN_CAMIONETA - Constants.volumen_linea_blanca) && flag == false) //si el camion se lleno y no tuvo problema de que no entro algo de la localidad
+            if (volumen_aux >= (Constants.VOLUMEN_CAMIONETA - Constants.volumen_electro_pequeños) && flag == false) //si el camion se lleno y no tuvo problema de que no entro algo de la localidad
                 estado = eOpcion.se_lleno_completo_;
 
             return estado;
         }
+        return eOpcion.se_lleno_completo_; //porque sino tira error, la idea es q nunca llegue aca
 
+        }
 
+    static void Ordenar_por_prioridad_pedido(List<pedido_por_cliente> lista)
+        {
+            //primero ordena por express y luego normales y luego diferidos
+            List<pedido_por_cliente> aux = new List<pedido_por_cliente>();
+            for (int i = 0; i < lista.Count; i++)
+            {
+                if (lista[i].tipo_entrega == entrega.express)
+                {
+                    //meto el pedido express a la lista auxiliar y la elimino de la original
+                    aux.Add(lista[i]);
+                    lista.RemoveAt(i);
+                }
+            }
+            //para cuando salga del for, voy a tener en la lista aux solo los pedidos express y en la lista original los normales, ahora agrego los normales a la lista auxiliar (al final)
+            for (int i = 0; i < lista.Count; i++)
+            {
+                aux.Add(lista[i]);
+            }
 
+            lista = aux; //ahora la lista esta ordenada por primero express y despues normales
+        }
 
+    static void rellenar_camion(List<eLocalidad> lista_localidades_normal, List<pedido_por_cliente> pedido_a_entregar, List<pedido_por_cliente> pedidos_del_dia_normales, int cont_camiones)
+        {
+            eOpcion chequeo_camion_lleno = eOpcion.no_se_lleno;
 
+            while (chequeo_camion_lleno == eOpcion.no_se_lleno && lista_localidades_normal != null)
+            { //mientras que el camion no este lleno o mientras siga habiendo locaclidades que recorrer
+                chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, cont_camiones, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
 
+                if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
+                    lista_localidades_normal.RemoveAt(0);
+
+            }
+            //va a voler al main con la lista de pedidos a entregar agregando algunos pedidos normales, y si se lograron poner localidades enteras de pedidos normales, tamb los saca de la lista y va a voler al main la lista actualizada
+        }
+
+     static int Cantidad_Televisores(pedido_por_cliente pedido_del_dia)
+    {
+        int cont = 0;
+        for(int i = 0; i < pedido_del_dia.cantidad_objetos; i++)
+        {
+            if (pedido_del_dia.compra_objetos[i] == objetos.telvisores)
+                cont++;
+        }
+        return cont;
     }
+
+    static bool Verifical_electro_pequeño(pedido_por_cliente pedido_del_dia)
+    {
+        int cont = 0;
+        for (int i = 0; i < pedido_del_dia.cantidad_objetos; i++)
+        {
+            //si es un electrodomestico pequeño
+            if (pedido_del_dia.compra_objetos[i] == objetos.licuadora || pedido_del_dia.compra_objetos[i] == objetos.exprimidor || pedido_del_dia.compra_objetos[i] == objetos.rallador || pedido_del_dia.compra_objetos[i] == objetos.tostadora || pedido_del_dia.compra_objetos[i] == objetos.cafetera || pedido_del_dia.compra_objetos[i] == objetos.molinillos)
+                cont++;
+        }
+        if (cont > 0)
+            return true;
+        else
+            return false;
+    }
+
 
     static void Main(string[] args)
     {
