@@ -98,11 +98,11 @@ namespace sol_greedy_dinamica
             get { return entrega_compra; }
         }
         //metodos
-        public pedido_por_cliente(string nombre_, eLocalidad barrio_, int peso_total_, entrega entrega_compra_)//ver del cuaderno de progra1 cmo era lo de id
+        public pedido_por_cliente(string nombre_, eLocalidad barrio_, List<objetos> obj , entrega entrega_compra_)//ver del cuaderno de progra1 cmo era lo de id
         {
             nombre_cliente = nombre_;
             barrio_a_entregar = barrio_;
-            compra = new List<objetos>();
+            compra = obj;
             volumen_total = calculo_volumen_total(compra);
             peso_total = calculo_peso_total(compra);
             entrega_compra = entrega_compra_;
@@ -926,6 +926,37 @@ internal class Program
 
     static void Main(string[] args)
     {
+
+        List<objetos> lista_taylor = new List<objetos>();
+        lista_taylor.Add(objetos.cafetera);
+        lista_taylor.Add(objetos.computadoras);
+        lista_taylor.Add(objetos.exprimidor);
+        List<objetos> lista_sabrina= new List<objetos>();
+        lista_sabrina.Add(objetos.licuadora);
+        lista_sabrina.Add(objetos.secarropas);
+        List<objetos> lista_olivia = new List<objetos>();
+        lista_olivia.Add(objetos.tostadora);
+        lista_olivia.Add(objetos.cafetera);
+        lista_olivia.Add(objetos.cocinas);
+        lista_olivia.Add(objetos.heladera);
+        List<objetos> lista_harry = new List<objetos>();
+        lista_harry.Add(objetos.computadoras);
+        lista_harry.Add(objetos.accesorios);
+        List<objetos> lista_louis = new List<objetos>();
+        lista_louis.Add(objetos.impresoras);
+        lista_louis.Add(objetos.accesorios);
+        lista_louis.Add(objetos.cafetera);
+        List<objetos> lista_ricardo = new List<objetos>();
+        lista_ricardo.Add(objetos.cocinas);
+        lista_ricardo.Add(objetos.rallador);
+        lista_ricardo.Add(objetos.telvisores);
+        lista_ricardo.Add(objetos.telvisores);
+        pedido_por_cliente pedido1 = new pedido_por_cliente("Taylor Swift", eLocalidad.VicenteLopez,lista_taylor , entrega.express);
+        pedido_por_cliente pedido2 = new pedido_por_cliente("Sabrina Carpenter", eLocalidad.LaBoca,lista_sabrina , entrega.diferido);
+        pedido_por_cliente pedido3 = new pedido_por_cliente("Olivia Rodrigo", eLocalidad.Palermo, lista_olivia, entrega.normal);
+        pedido_por_cliente pedido4 = new pedido_por_cliente("Harry Styles", eLocalidad.Caballito,lista_harry , entrega.express);
+        pedido_por_cliente pedido5 = new pedido_por_cliente("Louis Tomlinson", eLocalidad.Chacarita,lista_louis , entrega.normal);
+        pedido_por_cliente pedido6 = new pedido_por_cliente("Ricardo Fort", eLocalidad.PuertoMadero,lista_ricardo , entrega.express);
 
     }
 }
