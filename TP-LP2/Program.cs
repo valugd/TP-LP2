@@ -224,11 +224,12 @@ internal class Program
     {
 
         List<pedido_por_cliente> pedidos_del_dia_tipo_de_pedido = Filtrar_por_pedido(pedidos_del_dia, entrega.express); //filtramos la lista de pedidos total para obtener solo la lista de clientes qeu tienen envio express
+        List<eLocalidad> lista_localidad = Lista_Barrios_Ordenada(pedidos_del_dia_tipo_de_pedido); //me va a devolver una lista con los barrios ordenados del mas cercano a liniers al mas alejado
         int barrios_a_recorrer = Barrios_en_pedido_del_dia(pedidos_del_dia_tipo_de_pedido); //la cantidad de barrios que tenemos que recorrer para entregar esos pedidos express
-        List<int> orden_clientes = new List<int>(); //donde vamos a guardar la lista de los barios en orden de ls barrios que tenemos que recorrer
+        List<eLocalidad> orden_clientes = new List<eLocalidad>(); //donde vamos a guardar la lista de los barios en orden de ls barrios que tenemos que recorrer
 
         int[,] matriz = new int[barrios_a_recorrer, barrios_a_recorrer];
-        matriz = llenar_matriz_con_distancias(pedidos_del_dia_tipo_de_pedido, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer, esto es para poder hacer el agoritmo de dkjistra
+        matriz = llenar_matriz_con_distancias(lista_localidad, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer, esto es para poder hacer el agoritmo de dkjistra
                                                                                                    //basicamente me calcula la distancia entre cada nodo (ya que cada nodo (localidad) tiene direccion bidireccional y conexion con todos los demas nodos
 
         bool[] verificacion_barrios = new bool[barrios_a_recorrer]; //vector de bool que vamos a usar para saber si un barrio fue recorrido o no, si esta en true (ya lo recorrimos)
@@ -238,15 +239,15 @@ internal class Program
         //para calcular el camino -> el mejor camino ¡¡en el momento!! -> algortimo de djkistra
         while (chequeo_verificacion_barrios(verificacion_barrios) != 1) //funcion que me devuelve si ya todos los barrios fueron recorridos o no -> 1 si llegaste al final, 0 si no llegaste al final y -1 si falta un barrio
         {
-            int min = min_distancia(matriz, i, verificacion_barrios, barrios_a_recorrer, orden_clientes);//la funcion me devuelve la distancia minima que va a hacer el camion para ir de un barrio a otro (con este algoritmo va a ir eligiendo siempre la dist minima entre barrio y barrio)
-                                                                                                         // tambien la funcion min_distancia me llena la lista orden_clientes poniendome en la pos h el barrio a recorrer
-            i = orden_clientes.ElementAt(h); //ahora i va a ser de donde sale el camion, es por eso que apenas entramos al while, es 0, porque siempre sale de liniers, y por eso agarra la ult pos de la lista que va guardando los barrios en orden
+            int min = min_distancia(matriz, i, verificacion_barrios, barrios_a_recorrer, orden_clientes, lista_localidad);//la funcion me devuelve la distancia minima que va a hacer el camion para ir de un barrio a otro (con este algoritmo va a ir eligiendo siempre la dist minima entre barrio y barrio)
+            // tambien la funcion min_distancia me llena la lista orden_clientes poniendome en la pos h el barrio a recorrer, eLocalidad
+            i = numero_de_posicion_barrio(orden_clientes.ElementAt(h), lista_localidad); //ahora i va a ser de donde sale el camion, es por eso que apenas entramos al while, es 0, porque siempre sale de liniers, y por eso agarra la ult pos de la lista que va guardando los barrios en orden, pero como orden cliente es eLocalidad, la funcion numero de posicion barrrio te pasa en que posicion de la matriz esta el barrio que recien se recorrio
             h++;
         }
 
         List<pedido_por_cliente> lista_clientes_filtrada_ordenada = new List<pedido_por_cliente>();
 
-        lista_clientes_filtrada_ordenada = Ordenar_por_pedidio(orden_clientes, pedidos_del_dia);
+        lista_clientes_filtrada_ordenada = Ordenar_por_pedidio(orden_clientes, pedidos_del_dia); //me pone los clientes que pertenecen a los barrios a recorrer en orden en la lista, tambien por barrio estan organizados primero los express y despues los normales
 
         int cant_camiones = 0;
 
@@ -260,7 +261,7 @@ internal class Program
 
 
     }
-
+    
     //PRGRAMACION DINAMICA
     static void solucion_dinamica_segundaopcion(List<pedido_por_cliente> pedidos_del_dia_, int[] camiones_del_dia)
     {
@@ -293,6 +294,16 @@ internal class Program
 
 
     //funciones 
+    static int numero_de_posicion_barrio(eLocalidad barrio_elegido, List<eLocalidad> lista_localidad)
+    {
+        int pos = 0;
+        for (int i = 0; i < lista_localidad.Count; i++)
+        {
+            if (lista_localidad[i] == barrio_elegido)
+                pos = i;
+        }
+        return pos;
+    }
     static int chequeo_verificacion_barrios(bool[] verificacion_barrios)
     {
         // devuelve -> 1 si llegaste al final (todos los barrios fueron recorridos), 0 si no llegaste al final (falta mas de un barrio por recorrer) y -1 si falta un barrio (solo falta un barrio por recorrer)
@@ -375,9 +386,8 @@ internal class Program
         return dist;
     }
 
-    static int min_distancia(int[,] matriz, int pos, bool[] verificacion_barrios, int barrios, List<int> orden_clientes)
+    static int min_distancia(int[,] matriz, int pos, bool[] verificacion_barrios, int barrios, List<eLocalidad> orden_clientes, List<eLocalidad> lista_localidad)
     {
-
         int min = Constants.max_index; //le pongo un valor muy alto, para que la primera vez que compare con la distancia de una localidad 
         int min_index = 0; ;
         int i = 0;
@@ -387,7 +397,7 @@ internal class Program
             if (verificacion_barrios[v] == false && matriz[pos, v] <= min)//si el barrio no fue recorrido y es la pos minima de esa fila de la matriz, es decir, del camino que tengo desde ese barrio a los demas que tengo que ir, entro
             {
                 i = v;//i=barrio que fui
-                min = matriz[pos, v];
+                min = matriz[pos, v]; //distancia que recorri
                 min_index = v;
             }
 
@@ -395,15 +405,17 @@ internal class Program
 
 
         verificacion_barrios[i] = true; //ya recorridomo
-        orden_clientes.Add(i);//sumo el barrio a la lista
+        orden_clientes.Add(lista_localidad[i]);//sumo el barrio a la lista
+
+        //explicacion conexion lista localidades y matriz, lista localidades esta ordenada de menor a mayor distancia con respecto a liniers. Ejemplo en la posicion 0 de la lista de localidades esta mataderos, entonces en la fila y columna 0 va a estar las distancia de mataderos con los otros barrios
 
         return min_index;
     }
-
+    
     static void despacho_de_productos(List<eLocalidad> lista_localidades_normal, List<pedido_por_cliente> pedidos_del_dia_express, List<pedido_por_cliente> pedidos_del_dia_normales, List<eLocalidad> lista_localidades_express, List<pedido_por_cliente> pedido_a_entregar, int cont_camiones)
     {//las listas de localidades estan ordenadas por orden de menor distancia a liniers a mayor
         eOpcion chequeo_camion_lleno = eOpcion.no_se_lleno;
-        List<int> camino_mas_corto;
+        List<eLocalidad> camino_mas_corto=new List<eLocalidad>();
 
         if (lista_localidades_express == null) //si no hay mas localidades express, es decir ya recorri todas las express, sigo con los pedidos normales
         {
@@ -418,9 +430,9 @@ internal class Program
 
 
             int barrios_a_recorrer = Barrios_en_pedido_del_dia(pedido_a_entregar); //la cantidad de barrios que se lograron meter en el camion
-
-            int[,] matriz = new int[barrios_a_recorrer, barrios_a_recorrer];
-            matriz = llenar_matriz_con_distancias(pedido_a_entregar, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer
+            List<eLocalidad> lista_localidades = Lista_Barrios_Ordenada(pedido_a_entregar);
+             int[,] matriz = new int[barrios_a_recorrer, barrios_a_recorrer];
+            matriz = llenar_matriz_con_distancias(lista_localidades, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer
 
             // algoritmo de Bellman–Held–Karp
             //es un algoritmo de programación dinámica  para resolver el problema del viajante de comercio (TSP), en el que el La entrada es una matriz de distancia entre un conjunto de ciudades, y el objetivo es encontrar un recorrido de duración mínima que visite cada ciudad exactamente una vez antes de regresar al punto de partida. 
@@ -448,8 +460,8 @@ internal class Program
 
             int barrios_a_recorrer = Barrios_en_pedido_del_dia(pedido_a_entregar);
             int[,] matriz = new int[barrios_a_recorrer, barrios_a_recorrer];
-
-            matriz = llenar_matriz_con_distancias(pedido_a_entregar, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer
+            List<eLocalidad> lista_localidades = Lista_Barrios_Ordenada(pedido_a_entregar);
+            matriz = llenar_matriz_con_distancias(lista_localidades, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer
 
             // algoritmo de Bellman–Held–Karp
             //es un algoritmo de programación dinámica  para resolver el problema del viajante de comercio (TSP), en el que el La entrada es una matriz de distancia entre un conjunto de ciudades, y el objetivo es encontrar un recorrido de duración mínima que visite cada ciudad exactamente una vez antes de regresar al punto de partida. 
@@ -588,31 +600,33 @@ internal class Program
         return aux;
     }
 
-    static List<pedido_por_cliente> Ordenar_por_pedidio(List<int> camino_mas_corto, List<pedido_por_cliente> pedido_a_entregar)
+    static List<pedido_por_cliente> Ordenar_por_pedidio(List<eLocalidad> camino_mas_corto, List<pedido_por_cliente> pedido_a_entregar)
     {
         List<pedido_por_cliente> pedidos_ordenados = new List<pedido_por_cliente>();
         List<pedido_por_cliente> aux = new List<pedido_por_cliente>();
 
         for (int i = 0; i < camino_mas_corto.Count; i++)
         {
+            aux.RemoveRange(0, aux.Count); //elimino lo que habia en la lista de otras operaciones
+
             for (int h = 0; h < pedido_a_entregar.Count; h++)
             {
-                if (num_asignado_barrio(pedido_a_entregar[h].barrio) == camino_mas_corto[i])
+                if (pedido_a_entregar[h].barrio == camino_mas_corto[i])//si la localidad del barrio es igual a la localidad que se debe seleccionar en el momento
                     aux.Add(pedido_a_entregar[h]);
             }
 
-            Ordenar_por_prioridad_pedido(aux);
+            Ordenar_por_prioridad_pedido(aux); //esta funcion me pone primero los pedidos express y despues los normales de la localidad que acabo de llenar
 
             for (int n = 0; n < aux.Count; n++)
             {
-                pedidos_ordenados.Add(aux.ElementAt(n));
+                pedidos_ordenados.Add(aux.ElementAt(n)); //agrego los pedidos de la localidad recien ordenada en la lista que vamos a devolver
             }
         }
         return pedidos_ordenados;
 
     }
 
-    static int[,] llenar_matriz_con_distancias(List<pedido_por_cliente> pedidos_del_dia_tipo_de_pedido, int barrios)
+    static int[,] llenar_matriz_con_distancias(List<eLocalidad> lista_localidades, int barrios)
     {
         //esta es la matriz que ya esta predeterminada, tiene todas las distancias de cada localidad a localidad
         int[,] matriz_definitiva = new int[25, 25];
@@ -657,50 +671,52 @@ internal class Program
     }
 
     //revisar
-    static List<int> encontrar_camino_mas_corto(int[,] matriz, int barrios_a_recorrer)
+    static List<eLocalidad> encontrar_camino_mas_corto(int[,] matriz, int barrios_a_recorrer)
     {
         //al poner al ultimo y primero barrio como liners, va a partir de liniers, ir por todos los nodos y volver a liniers
         // hay que reflejar eso en la matriz, poniendo dos veces liniers, es decir, poner que el barrio 0 y bario ultimo sean liniers
 
-        int indice = barrios_a_recorrer + 2;//tengo que volver a liniers, el indicie es la cantidad de movimientos que tengo q hacer para llegar al nodo final
+        //int indice = barrios_a_recorrer + 2;//tengo que volver a liniers, el indicie es la cantidad de movimientos que tengo q hacer para llegar al nodo final
 
-        int min = Constants.max_index;
-        List<int> camino = new List<int>();
-        int[] costo = new int[barrios_a_recorrer + 2];
-        int[] distancia = new int[barrios_a_recorrer + 2];
-
-
-        //inicializo costo
-        for (int i = 1; i < barrios_a_recorrer + 2; i++)
-        {
-            costo[i] = 0;
-        }
-        costo[barrios_a_recorrer + 1] = matriz[0, barrios_a_recorrer + 1]; //pongo la distancia del ultimo barrio (mas alejado de liniers) a liniers
-
-        for (int i = (barrios_a_recorrer + 1) - 1; i >= 1; i--) //empezamos desde el ultimo barrio
-        {
-            min = Constants.max_index;
-            for (int k = i + 1; k <= (barrios_a_recorrer + 1); k++)
-            {
-                if (matriz[i, k] != 0 && matriz[i, k] + costo[k] < min) //calcula la distancia minima de ir de nodo a nodo, fijandose por todos los caminos posibles pero verificando de no
-                {
-                    min = matriz[i, k] + costo[k];
-                    distancia[i] = k;
-                }
-            }
-            costo[i] = min; //me quedo con el miinimo costo de todos los caminos
-        }
-
-        //empiezo y termino en liniers, el primer y ultimo barrio va a ser liniers
-        camino.Add(0);//empiezo siempre desde el barrio 0
+        //int min = Constants.max_index;
+        // List<eLocalidad> camino = new List<eLocalidad>();
+        //int[] costo = new int[barrios_a_recorrer + 2];
+        //int[] distancia = new int[barrios_a_recorrer + 2];
 
 
-        for (int i = 2; i <= indice - 1; i++)//en distancia yo hbaia guardado los subindices, ahora se los asigno en orden a la lista del camino
-        {
-            camino.Add(distancia[camino.ElementAt(i - 1)]);
-        }
-        //en la lista va a aparecer que el primer barrio de donde parte es liniers siempre y el ultimo barrio al que vuelve es liniers tambien
-        camino.Add(0);
+        ////inicializo costo
+        //for (int i = 1; i < barrios_a_recorrer + 2; i++)
+        //{
+        //    costo[i] = 0;
+        //}
+        //costo[barrios_a_recorrer + 1] = matriz[0, barrios_a_recorrer + 1]; //pongo la distancia del ultimo barrio (mas alejado de liniers) a liniers
+
+        //for (int i = (barrios_a_recorrer + 1) - 1; i >= 1; i--) //empezamos desde el ultimo barrio
+        //{
+        //    min = Constants.max_index;
+        //    for (int k = i + 1; k <= (barrios_a_recorrer + 1); k++)
+        //    {
+        //        if (matriz[i, k] != 0 && matriz[i, k] + costo[k] < min) //calcula la distancia minima de ir de nodo a nodo, fijandose por todos los caminos posibles pero verificando de no
+        //        {
+        //            min = matriz[i, k] + costo[k];
+        //            distancia[i] = k;
+        //        }
+        //    }
+        //    costo[i] = min; //me quedo con el miinimo costo de todos los caminos
+        //}
+
+        ////empiezo y termino en liniers, el primer y ultimo barrio va a ser liniers
+        //camino.Add(0);//empiezo siempre desde el barrio 0
+
+
+        //for (int i = 2; i <= indice - 1; i++)//en distancia yo hbaia guardado los subindices, ahora se los asigno en orden a la lista del camino
+        //{
+        //    camino.Add(distancia[camino.ElementAt(i - 1)]);
+        //}
+        ////en la lista va a aparecer que el primer barrio de donde parte es liniers siempre y el ultimo barrio al que vuelve es liniers tambien
+        //camino.Add(0);
+        List<eLocalidad> camino = new List<eLocalidad>();
+
 
         return camino;
     }
