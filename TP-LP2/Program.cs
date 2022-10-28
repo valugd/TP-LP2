@@ -648,13 +648,37 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
 
     static int[,] llenar_matriz_con_distancias(List<eLocalidad> lista_localidades, int barrios)
     {
+        
         //esta es la matriz que ya esta predeterminada, tiene todas las distancias de cada localidad a localidad
         int[,] matriz_definitiva = new int[25, 25];
-        //llenamos la matriz
 
+        //llenarla
+
+
+        //llenamos la matriz
+        int[] num_barrios_en_matriz = new int[barrios];
         int[,] matriz_distancias = new int[barrios, barrios];
 
-        return matriz_definitiva;
+
+        int barrio_fijo = 0;
+        for(int i=0;i<barrios; i++)
+        {
+            barrio_fijo = num_asignado_barrio(lista_localidades[i]);
+            num_barrios_en_matriz[i] = barrio_fijo;
+        }
+        //tengo un vector con los numeros de los barrios que necesito correspondiente a la matriz ya definida
+   
+        
+        for(int i = 0; i < barrio_fijo; i++)
+        {
+           for (int pos_barrios = 0; pos_barrios < barrios; pos_barrios++)
+                {
+                matriz_distancias[i, pos_barrios] = matriz_definitiva[num_barrios_en_matriz[i], num_barrios_en_matriz[pos_barrios]];
+                }
+        }
+
+
+        return matriz_distancias;
 
     }
 
