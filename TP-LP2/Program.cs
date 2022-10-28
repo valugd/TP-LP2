@@ -305,7 +305,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
     }
     static int chequeo_verificacion_barrios(bool[] verificacion_barrios)
     {
-        // devuelve -> 1 si llegaste al final (todos los barrios fueron recorridos), 0 si no llegaste al final (falta mas de un barrio por recorrer) y -1 si falta un barrio (solo falta un barrio por recorrer)
+        // devuelve -> 1 si llegaste al final (todos los barrios fueron recorridos), 0 si no llegaste al final (falta mas de un barrio por recorrer) y -1 si falta un barrio (solo falta un barrio por recorrer), -2 si no se recorrio ningun barrio todavia
 
         int cont = 0;
         for (int i = 0; i < verificacion_barrios.Length; i++)
@@ -317,6 +317,8 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
             return 1; //todos los barrios fueron recorridos
         else if (cont == 1)
             return -1; //solo falta un barrio
+        else if (cont == verificacion_barrios.Length)
+            return -2;
         else
             return 0; //falta mas de un barrio por recorrer
     }
@@ -388,27 +390,52 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
     static int min_distancia(int[,] matriz, int pos, bool[] verificacion_barrios, int barrios, List<eLocalidad> orden_clientes, List<eLocalidad> lista_localidad)
     {
         int min = Constants.max_index; //le pongo un valor muy alto, para que la primera vez que compare con la distancia de una localidad 
-        int min_index = 0; ;
         int i = 0;
 
-        for (int v = 1; v < barrios; v++) //voy recorriendo todos los nodos
+        if(chequeo_verificacion_barrios(verificacion_barrios) == -2)//si todavia no se recorrio ningun barrio, voy al que mas cerca este de liniers primero
         {
-            if (verificacion_barrios[v] == false && matriz[pos, v] <= min)//si el barrio no fue recorrido y es la pos minima de esa fila de la matriz, es decir, del camino que tengo desde ese barrio a los demas que tengo que ir, entro
+            for(int h = 0; h < barrios; h++)
             {
-                i = v;//i=barrio que fui
-                min = matriz[pos, v]; //distancia que recorri
-                min_index = v;
+                if (calcular_distancia_barrio_a_liniers(lista_localidad[h]) < min)
+                {
+                    i = h;//i=barrio que fui
+                    min = calcular_distancia_barrio_a_liniers(lista_localidad[h]);
+                }
+            }
+            verificacion_barrios[i] = true; //ya recorridomo
+            orden_clientes.Add(lista_localidad[i]);//sumo el barrio a la lista
+        }
+        if (chequeo_verificacion_barrios(verificacion_barrios) == -1)//solo falta un barrio, calculo la distancia de ese barrio a liniers, para que vuelva el camion
+        {
+            for (int h = 0; h < barrios; h++)
+            {
+                if (verificacion_barrios[h] == false)//al primero que entre va a ser el unico que no recorri
+                { orden_clientes.Add(lista_localidad[h]);
+                    min = calcular_distancia_barrio_a_liniers(lista_localidad[h]);
+                }
+            }
+        }
+        else
+        {
+
+            for (int v = 0; v < barrios; v++) //voy recorriendo todos los nodos
+            {
+                if (verificacion_barrios[v] == false && matriz[pos, v] < min && matriz[pos, v] != 0)//si el barrio no fue recorrido y es la pos minima de esa fila de la matriz, es decir, del camino que tengo desde ese barrio a los demas que tengo que ir, entro
+                {
+                    i = v;//i=barrio que fui
+                    min = matriz[pos, v]; //distancia que recorri
+                    
+                }
+
             }
 
+
+            verificacion_barrios[i] = true; //ya recorridomo
+            orden_clientes.Add(lista_localidad[i]);//sumo el barrio a la lista
         }
-
-
-        verificacion_barrios[i] = true; //ya recorridomo
-        orden_clientes.Add(lista_localidad[i]);//sumo el barrio a la lista
-
         //explicacion conexion lista localidades y matriz, lista localidades esta ordenada de menor a mayor distancia con respecto a liniers. Ejemplo en la posicion 0 de la lista de localidades esta mataderos, entonces en la fila y columna 0 va a estar las distancia de mataderos con los otros barrios
 
-        return min_index;
+        return min;
     }
     
     static void despacho_de_productos(List<eLocalidad> lista_localidades_normal, List<pedido_por_cliente> pedidos_del_dia_express, List<pedido_por_cliente> pedidos_del_dia_normales, List<eLocalidad> lista_localidades_express, List<pedido_por_cliente> pedido_a_entregar, int cont_camiones)
@@ -626,6 +653,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         //llenamos la matriz
 
         int[,] matriz_distancias = new int[barrios, barrios];
+
         return matriz_definitiva;
 
     }
@@ -670,7 +698,10 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         bool[] verificacion_barrios = new bool[barrios_a_recorrer]; //vector de bool que vamos a usar para saber si un barrio fue recorrido o no, si esta en true (ya lo recorrimos)
         int h = 1; //para ir llenando orden a clientes
         int i = 0;
-
+        for(int j = 0; j < barrios_a_recorrer; j++)
+        {
+            verificacion_barrios[j] = false;
+        }
         //para calcular el camino -> el mejor camino ¡¡en el momento!! -> algortimo de djkistra
         while (chequeo_verificacion_barrios(verificacion_barrios) != 1) //funcion que me devuelve si ya todos los barrios fueron recorridos o no -> 1 si llegaste al final, 0 si no llegaste al final y -1 si falta un barrio
         {
