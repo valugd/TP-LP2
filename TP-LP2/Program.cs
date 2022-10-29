@@ -7,9 +7,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
-
-
+using System.Globalization;
 
 namespace sol_greedy_dinamica
 {
@@ -36,7 +34,8 @@ namespace sol_greedy_dinamica
     public enum eOpcion { se_lleno_completo_, se_lleno_pero_quedaron_cosas_de_la_localidad, no_se_lleno };
     public enum entrega { express, normal, diferido };
     public enum objetos { licuadora, exprimidor, rallador, tostadora, cafetera, molinillos, cocinas, calefon, termotanque, lavarropas, secarropas, heladera, microondas, freezer, computadoras, impresoras, accesorios, telvisores };
-
+     
+   // public enum eVehiculo { camioneta, furgoneta, furgon};
     public enum eTipoProducto { linea_blanca, pequeños_electrodomesticos, electronicos, televisores }
 
     //clases
@@ -115,29 +114,19 @@ namespace sol_greedy_dinamica
             int suma = 0;
             for (int i = 0; i < compra.Count; i++)
             {
-                suma = suma + volumen_elemento(compra[i]); //peso elemento(objeto) le paso un objeto y me devuelve su volumen
+                suma = suma + compra[i].volumenobjeto; //peso elemento(objeto) le paso un objeto y me devuelve su volumen
 
             }
             return suma;
-        }
-        int volumen_elemento(electrodomesticos obj)
-        {
-            return obj.volumenobjeto;
-           
         }
         int calculo_peso_total(List<electrodomesticos> compra)
         {
             int suma = 0;
             for (int i = 0; i < compra.Count; i++)
             {
-                suma = suma + peso_elemento(compra[i]); //peso elemento(objeto) le paso un objeto y me devuelve cuanto pesa
+                suma = suma + compra[i].pesoobjeto; //peso elemento(objeto) le paso un objeto y me devuelve cuanto pesa
             }
             return suma;
-        }
-        int peso_elemento(electrodomesticos obj)
-        {
-            return obj.pesoobjeto;
-            
         }
     }
 
@@ -397,6 +386,51 @@ namespace sol_greedy_dinamica
         }
     }
 
+
+    public class eVehiculo
+    {
+        protected int nafta;
+        public int cant_nafta
+        {
+            get { return nafta; }
+            set { }
+        }
+        protected int cant_meses_uso;
+        public int meses_uso
+        {
+            get { return cant_meses_uso; }
+            set { }
+        }
+
+    }
+
+    public class Camioneta:eVehiculo
+    {
+        public Camioneta(int nafta_,int meses)
+        {
+            cant_nafta = nafta_;
+            cant_meses_uso = meses_uso;
+        }
+    }
+
+    public class Furgon : eVehiculo
+    {
+        public Furgon(int nafta_, int meses)
+        {
+            cant_nafta = nafta_;
+            cant_meses_uso = meses_uso;
+        }
+    }
+
+    public class Furgoneta : eVehiculo
+    {
+        public Furgoneta(int nafta_, int meses)
+        {
+            cant_nafta = nafta_;
+            cant_meses_uso = meses_uso;
+        }
+    }
+
 }
 
 
@@ -449,7 +483,7 @@ internal class Program
     //}
 
     
-static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_del_dia_, int[] camiones_del_dia)
+static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_del_dia_, List<eVehiculo> camiones_del_dia)
     {
         //filtramos la lista completa pasada por parametro en listas de las localidades con pedidos express y normales, y los pedidos express y normales
         List<pedido_por_cliente> pedidos_del_dia_express = Filtrar_por_pedido(pedidos_del_dia_, entrega.express);
@@ -461,14 +495,17 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         List<pedido_por_cliente> pedido_a_entregar = new List<pedido_por_cliente>();
 
 
+        eVehiculo camion = camiones_del_dia.ElementAt(0); //siempre empezamos con la camioneta
         int cont_camiones = 0;
-
-        //tenemos 5 camiones para usar: 
-        // 0: camioneta 1:camioneta 2:camioneta 3:camioneta 4:furgon 5:furgoneta
-        while (cont_camiones < camiones_del_dia.Length && (lista_localidades_express != null || lista_localidades_normal != null))
+        int max_viajes = max_viajes_por_dia(camiones_del_dia);
+        while (cont_camiones < max_viajes && (lista_localidades_express != null || lista_localidades_normal != null))
         {//hasta que no haya mas camiones o haya despachado todos los productos
-            despacho_de_productos(lista_localidades_normal, pedidos_del_dia_express, pedidos_del_dia_normales, lista_localidades_express, pedido_a_entregar, camiones_del_dia[cont_camiones]); //calculo el mejor camino, y despacho todos los paquetes posibles, dandole prioridad a los express
+            despacho_de_productos(lista_localidades_normal, pedidos_del_dia_express, pedidos_del_dia_normales, lista_localidades_express, pedido_a_entregar,camion); //calculo el mejor camino, y despacho todos los paquetes posibles, dandole prioridad a los express
             cont_camiones++;//se lleno el camion anterior, uso el siguiente
+            if (cont_camiones == 4) //seguimos con el furgon
+                camion = camiones_del_dia.ElementAt(1);
+            if (cont_camiones == 5)//seguimos con la furgoneta
+                camion = camiones_del_dia.ElementAt(2);
             pedido_a_entregar.RemoveRange(0, pedido_a_entregar.Count); //como los vamos entregando, borro la lista porque ya salio el camion
 
         }
@@ -478,6 +515,15 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
     }
 
     //funciones 
+   static int max_viajes_por_dia(List<eVehiculo>camiones_del_dia)
+    {
+        int viajes = 4;  //la camioneta siemrpe sale por lo que siempre voy a tener 4 viajes minimo
+        if (camiones_del_dia.Count == 2) //si solo sale el furgon o la furgoneta mas la camioneta
+            viajes++;
+        if (camiones_del_dia.Count == 2) //si salen los 3 vehiculos
+            viajes = viajes + 2;
+        return viajes;
+    }
     static int numero_de_posicion_barrio(eLocalidad barrio_elegido, List<eLocalidad> lista_localidad)
     {
         int pos = 0;
@@ -623,7 +669,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         return min;
     }
     
-    static void despacho_de_productos(List<eLocalidad> lista_localidades_normal, List<pedido_por_cliente> pedidos_del_dia_express, List<pedido_por_cliente> pedidos_del_dia_normales, List<eLocalidad> lista_localidades_express, List<pedido_por_cliente> pedido_a_entregar, int cont_camiones)
+    static void despacho_de_productos(List<eLocalidad> lista_localidades_normal, List<pedido_por_cliente> pedidos_del_dia_express, List<pedido_por_cliente> pedidos_del_dia_normales, List<eLocalidad> lista_localidades_express, List<pedido_por_cliente> pedido_a_entregar, eVehiculo camion)
     {//las listas de localidades estan ordenadas por orden de menor distancia a liniers a mayor
         eOpcion chequeo_camion_lleno = eOpcion.no_se_lleno;
         List<eLocalidad> camino_mas_corto=new List<eLocalidad>();
@@ -632,7 +678,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         {
             while (chequeo_camion_lleno == eOpcion.no_se_lleno && lista_localidades_normal != null)
             { //mientras que el camion no este lleno o mientras siga habiendo locaclidades que recorrer
-                chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, cont_camiones, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
+                chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, camion, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
 
                 if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
                     lista_localidades_normal.RemoveAt(0);
@@ -655,14 +701,14 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
             while (chequeo_camion_lleno == eOpcion.no_se_lleno && lista_localidades_express != null)
             { //mientras haya locaclidades express que recorrer y el camion este vacio
 
-                chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, cont_camiones, pedido_a_entregar);
+                chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, camion, pedido_a_entregar);
 
                 if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
                     lista_localidades_normal.RemoveAt(0);
 
                 //si despues de poner lo ultimo en el camion de lo express este no se lleno, lo relleno con productos de tipo entrega normal
                 if (lista_localidades_express == null && chequeo_camion_lleno == eOpcion.no_se_lleno)
-                    rellenar_camion(lista_localidades_normal, pedido_a_entregar, pedidos_del_dia_normales, cont_camiones);
+                    rellenar_camion(lista_localidades_normal, pedido_a_entregar, pedidos_del_dia_normales, camion);
                 //llenamos el camion con los pedidos normales de las zonas mas cercanas a liniers -> eliminamos esas localidades de la lista ya directamente adentro de la funcion, al igual que los pedidos incluidos
             }
 
@@ -682,20 +728,20 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         //primero ordena por barrio, poniendo primero a los del primer barrio a recorrer y después los del último barrio. 
         pedido_a_entregar = Ordenar_por_pedidio(camino_mas_corto, pedido_a_entregar);
 
-        llenado_despacho_productos(cont_camiones, pedido_a_entregar); //esta funcion me va a llenar el camión que yo le pase por parámetro, con los pedidos de las localidades seleccionadas
+        llenado_despacho_productos(camion, pedido_a_entregar); //esta funcion me va a llenar el camión que yo le pase por parámetro, con los pedidos de las localidades seleccionadas
 
 
 
     }
 
-    static void llenado_despacho_productos(int cant_camion, List<pedido_por_cliente> lista_completa_pedidos)
+    static void llenado_despacho_productos(eVehiculo camion, List<pedido_por_cliente> lista_completa_pedidos)
     {
         //lista pedidos esta fltrada por solo las zonas que estan en el recorrido y primero estan puestos los del envio express, esto lo hacemos desde las funciones en donde llamamos a esta funcion, es por esto que siempre agarramos la posicion 0, porque vamos eliminando al primero despues de meterlo al camion -> siempre el primero de la lista es el que tenemos que meter primero
         Queue<pedido_por_cliente> pedidos_a_entregar = new Queue<pedido_por_cliente>(); //cola donde vamos a ir poniendo los pedidos FIRST IN -> FIRST OUT
         int volumen_aux = 0;
         int peso_aux = 0;
 
-        if (cant_camion == 0 || cant_camion == 1 || cant_camion == 2 || cant_camion == 3) //si el camion seleccionado es la camioneta
+        if (camion.GetType()==typeof(Camioneta) )//si el camion seleccionado es la camioneta
         {//las camionetas no tiene limite de peso, solo de volumen
             while (volumen_aux < Constants.VOLUMEN_CAMIONETA) //mientras que el volumen que tiene sea menor que el max de la camioneta
             {
@@ -710,7 +756,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
 
             }
         }
-        else if (cant_camion == 4) //el camion seleccionado es el furgon
+        else if (camion.GetType()==typeof(Furgon)) //el camion seleccionado es el furgon
         {//en este caso chequeamos tanto el volumen total y el peso total 
             while (volumen_aux < Constants.VOLUMEN_FURGON && peso_aux < Constants.PESOMAXFURGON)
             {
@@ -1104,7 +1150,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         return orden_clientes;
     }
 
-    static eOpcion intento_llenar_camion(eLocalidad localidad, List<pedido_por_cliente> pedidos_del_dia, int cont_camiones, List<pedido_por_cliente> pedido_a_entregar)
+    static eOpcion intento_llenar_camion(eLocalidad localidad, List<pedido_por_cliente> pedidos_del_dia, eVehiculo camion, List<pedido_por_cliente> pedido_a_entregar)
     {
         bool flag_elevador = false;
         //llena el camion con los pedidos de la locacalidad pasada como paremetro, si logra llenar con todos los pedidos de la localidad y sigue habiendo espacio, devuelve que no se lleno. Si logra poner TODOS los pedidos de la localidad y no queda espacio, es decir, el volumen que ya lleno el camion es igual o mayor que el volumen total sin la caja mas pequeña de entrega entonces devuelvo que se llenó completo
@@ -1116,7 +1162,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         int peso_aux = 0;
 
         //camion elegido -> camioneta
-        if (cont_camiones == 0 || cont_camiones == 1 || cont_camiones == 2 || cont_camiones == 3)
+        if (camion.GetType() == typeof(Camioneta))
         {
 
 
@@ -1154,7 +1200,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
 
             return estado;
         }
-        else if (cont_camiones == 4) // camion elegido->furgon
+        else if (camion.GetType() == typeof(Furgon)) // camion elegido->furgon
         {
 
             for (int i = 0; i < pedidos_del_dia.Count; i++)
@@ -1265,13 +1311,13 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
             lista = aux; //ahora la lista esta ordenada por primero express y despues normales
         }
 
-    static void rellenar_camion(List<eLocalidad> lista_localidades_normal, List<pedido_por_cliente> pedido_a_entregar, List<pedido_por_cliente> pedidos_del_dia_normales, int cont_camiones)
+    static void rellenar_camion(List<eLocalidad> lista_localidades_normal, List<pedido_por_cliente> pedido_a_entregar, List<pedido_por_cliente> pedidos_del_dia_normales, eVehiculo camion)
         {
             eOpcion chequeo_camion_lleno = eOpcion.no_se_lleno;
 
             while (chequeo_camion_lleno == eOpcion.no_se_lleno && lista_localidades_normal != null)
             { //mientras que el camion no este lleno o mientras siga habiendo locaclidades que recorrer
-                chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, cont_camiones, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
+                chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, camion, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
 
                 if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
                     lista_localidades_normal.RemoveAt(0);
@@ -1306,40 +1352,75 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
             return false;
     }
 
-
+    static List<eVehiculo> camiones_disponibles(DateTime dia_hoy,List<eVehiculo> camiones_empresa)
+    {
+        List<eVehiculo> vector_camiones=new List<eVehiculo>();
+        byte dia = (byte)dia_hoy.DayOfWeek;
+        string dia_string = dia.ToString("dddd", new CultureInfo("es-ES"));//lo convierto en string
+        switch (dia_string)
+        {
+            case "lunes":
+                vector_camiones.Add(camiones_empresa.ElementAt(0)); //la camioneta
+                vector_camiones.Add(camiones_empresa.ElementAt(1)); //el furgon
+                vector_camiones.Add(camiones_empresa.ElementAt(2)); //la furgoneta
+                break;
+           case "martes":
+                vector_camiones.Add(camiones_empresa.ElementAt(0)); 
+                vector_camiones.Add(camiones_empresa.ElementAt(1));
+                break;
+            case "miercoles":
+                vector_camiones.Add(camiones_empresa.ElementAt(0));
+                vector_camiones.Add(camiones_empresa.ElementAt(2));
+                break;
+            case "jueves":
+                vector_camiones.Add(camiones_empresa.ElementAt(0)); 
+                vector_camiones.Add(camiones_empresa.ElementAt(1));
+                break;
+            case "viernes":
+                vector_camiones.Add(camiones_empresa.ElementAt(0)); 
+                vector_camiones.Add(camiones_empresa.ElementAt(1));
+                vector_camiones.Add(camiones_empresa.ElementAt(2));
+                break;
+            case "sabado":
+                vector_camiones.Add(camiones_empresa.ElementAt(0)); 
+                break;
+        }
+        return vector_camiones;
+    }
     static void Main(string[] args)
     {
 
-        List<objetos> lista_taylor = new List<objetos>();
-        lista_taylor.Add(objetos.cafetera);
-        lista_taylor.Add(objetos.computadoras);
-        lista_taylor.Add(objetos.exprimidor);
-        List<objetos> lista_sabrina= new List<objetos>();
-        lista_sabrina.Add(objetos.licuadora);
-        lista_sabrina.Add(objetos.secarropas);
-        List<objetos> lista_olivia = new List<objetos>();
-        lista_olivia.Add(objetos.tostadora);
-        lista_olivia.Add(objetos.cafetera);
-        lista_olivia.Add(objetos.cocinas);
-        lista_olivia.Add(objetos.heladera);
-        List<objetos> lista_harry = new List<objetos>();
-        lista_harry.Add(objetos.computadoras);
-        lista_harry.Add(objetos.accesorios);
-        List<objetos> lista_louis = new List<objetos>();
-        lista_louis.Add(objetos.impresoras);
-        lista_louis.Add(objetos.accesorios);
-        lista_louis.Add(objetos.cafetera);
-        List<objetos> lista_ricardo = new List<objetos>();
-        lista_ricardo.Add(objetos.cocinas);
-        lista_ricardo.Add(objetos.rallador);
-        lista_ricardo.Add(objetos.telvisores);
-        lista_ricardo.Add(objetos.telvisores);
-        pedido_por_cliente pedido1 = new pedido_por_cliente("Taylor Swift", eLocalidad.VicenteLopez,lista_taylor , entrega.express);
-        pedido_por_cliente pedido2 = new pedido_por_cliente("Sabrina Carpenter", eLocalidad.LaBoca,lista_sabrina , entrega.diferido);
-        pedido_por_cliente pedido3 = new pedido_por_cliente("Olivia Rodrigo", eLocalidad.Palermo, lista_olivia, entrega.normal);
-        pedido_por_cliente pedido4 = new pedido_por_cliente("Harry Styles", eLocalidad.Caballito,lista_harry , entrega.express);
-        pedido_por_cliente pedido5 = new pedido_por_cliente("Louis Tomlinson", eLocalidad.Chacarita,lista_louis , entrega.normal);
-        pedido_por_cliente pedido6 = new pedido_por_cliente("Ricardo Fort", eLocalidad.PuertoMadero,lista_ricardo , entrega.express);
+        //electrodomesticos cafetera = new cafetera(2, 4, "philips", 2, eTipoProducto.linea_blanca);
+        //List<electrodomesticos> lista_taylor = new List<electrodomesticos>();
+        //lista_taylor.Add(cafetera(12,1,"marca",7));
+        //lista_taylor.Add(objetos.computadoras);
+        //lista_taylor.Add(objetos.exprimidor);
+        //List<objetos> lista_sabrina= new List<objetos>();
+        //lista_sabrina.Add(objetos.licuadora);
+        //lista_sabrina.Add(objetos.secarropas);
+        //List<objetos> lista_olivia = new List<objetos>();
+        //lista_olivia.Add(objetos.tostadora);
+        //lista_olivia.Add(objetos.cafetera);
+        //lista_olivia.Add(objetos.cocinas);
+        //lista_olivia.Add(objetos.heladera);
+        //List<objetos> lista_harry = new List<objetos>();
+        //lista_harry.Add(objetos.computadoras);
+        //lista_harry.Add(objetos.accesorios);
+        //List<objetos> lista_louis = new List<objetos>();
+        //lista_louis.Add(objetos.impresoras);
+        //lista_louis.Add(objetos.accesorios);
+        //lista_louis.Add(objetos.cafetera);
+        //List<objetos> lista_ricardo = new List<objetos>();
+        //lista_ricardo.Add(objetos.cocinas);
+        //lista_ricardo.Add(objetos.rallador);
+        //lista_ricardo.Add(objetos.telvisores);
+        //lista_ricardo.Add(objetos.telvisores);
+        //pedido_por_cliente pedido1 = new pedido_por_cliente("Taylor Swift", eLocalidad.VicenteLopez,lista_taylor , entrega.express);
+        //pedido_por_cliente pedido2 = new pedido_por_cliente("Sabrina Carpenter", eLocalidad.LaBoca,lista_sabrina , entrega.diferido);
+        //pedido_por_cliente pedido3 = new pedido_por_cliente("Olivia Rodrigo", eLocalidad.Palermo, lista_olivia, entrega.normal);
+        //pedido_por_cliente pedido4 = new pedido_por_cliente("Harry Styles", eLocalidad.Caballito,lista_harry , entrega.express);
+        //pedido_por_cliente pedido5 = new pedido_por_cliente("Louis Tomlinson", eLocalidad.Chacarita,lista_louis , entrega.normal);
+        //pedido_por_cliente pedido6 = new pedido_por_cliente("Ricardo Fort", eLocalidad.PuertoMadero,lista_ricardo , entrega.express);
 
     }
 }
