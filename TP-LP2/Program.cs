@@ -25,7 +25,7 @@ namespace sol_greedy_dinamica
         public const int volumen_electro_pequeños = 50; //cambiar volumen real
         public const int volumen_linea_blanca = 50; //cambiar volumen real
         public const int volumen_electronicos = 50; //cambiar volumen real
-        public const int televisores = 50; //cambiar volumen real
+        public const int televisores =2*1*2; //cambiar volumen real
         public const int volumen_elevador = 50; //cambiar volumen real
         public const int peso_elevador = 50; //cambiar volumen real
 
@@ -53,11 +53,12 @@ namespace sol_greedy_dinamica
         {
             get { return tipo_producto_compra; }
         }
-        List<objetos> compra;
-        public List<objetos> compra_objetos
+        List<electrodomesticos> compra;
+        public List<electrodomesticos> compra_objetos
         {
             get { return compra; }
         }
+
         int cant_de_objetos;
         public int cantidad_objetos
         {
@@ -98,7 +99,7 @@ namespace sol_greedy_dinamica
             get { return entrega_compra; }
         }
         //metodos
-        public pedido_por_cliente(string nombre_, eLocalidad barrio_, List<objetos> obj , entrega entrega_compra_)//ver del cuaderno de progra1 cmo era lo de id
+        public pedido_por_cliente(string nombre_, eLocalidad barrio_, List<electrodomesticos> obj , entrega entrega_compra_)//ver del cuaderno de progra1 cmo era lo de id
         {
             nombre_cliente = nombre_;
             barrio_a_entregar = barrio_;
@@ -109,7 +110,7 @@ namespace sol_greedy_dinamica
 
         }
 
-        int calculo_volumen_total(List<objetos> compra)
+        int calculo_volumen_total(List<electrodomesticos> compra)
         {
             int suma = 0;
             for (int i = 0; i < compra.Count; i++)
@@ -119,24 +120,12 @@ namespace sol_greedy_dinamica
             }
             return suma;
         }
-        int volumen_elemento(objetos obj)
+        int volumen_elemento(electrodomesticos obj)
         {
-            if (obj == objetos.licuadora || obj == objetos.exprimidor || obj == objetos.rallador || obj == objetos.tostadora || obj == objetos.cafetera || obj == objetos.molinillos)
-            {
-                return Constants.volumen_electro_pequeños;
-            }
-            else if (obj == objetos.cocinas || obj == objetos.calefon || obj == objetos.termotanque || obj == objetos.lavarropas || obj == objetos.secarropas || obj == objetos.heladera || obj == objetos.microondas || obj == objetos.freezer)
-            {
-                return Constants.volumen_linea_blanca;
-            }
-            else if (obj == objetos.computadoras || obj == objetos.impresoras || obj == objetos.accesorios)
-            {
-                return Constants.volumen_electronicos;
-            }
-            else
-                return Constants.televisores;
+            return obj.volumenobjeto;
+           
         }
-        int calculo_peso_total(List<objetos> compra)
+        int calculo_peso_total(List<electrodomesticos> compra)
         {
             int suma = 0;
             for (int i = 0; i < compra.Count; i++)
@@ -145,72 +134,268 @@ namespace sol_greedy_dinamica
             }
             return suma;
         }
-        int peso_elemento(objetos obj)
+        int peso_elemento(electrodomesticos obj)
         {
-            int peso = 0;
-            switch (obj)
-            {
-                case objetos.licuadora:
-                    peso = 12;
-                    break;
-                case objetos.exprimidor:
-                    peso = 2;
-                    break;
-                case objetos.rallador:
-                    peso = 1;
-                    break;
-                case objetos.tostadora:
-                    peso = 3;
-                    break;
-                case objetos.cafetera:
-                    peso = 4;
-                    break;
-                case objetos.molinillos:
-                    peso = 1;
-                    break;
-                case objetos.cocinas:
-                    peso = 34;
-                    break;
-                case objetos.calefon:
-                    peso = 10;
-                    break;
-                case objetos.termotanque:
-                    peso = 28;
-                    break;
-                case objetos.lavarropas:
-                    peso = 64;
-                    break;
-                case objetos.secarropas:
-                    peso = 60;
-                    break;
-                case objetos.heladera:
-                    peso = 45;
-                    break;
-                case objetos.microondas:
-                    peso = 15;
-                    break;
-                case objetos.freezer:
-                    peso = 79;
-                    break;
-                case objetos.computadoras:
-                    peso = 7;
-                    break;
-                case objetos.impresoras:
-                    peso = 6;
-                    break;
-                case objetos.accesorios:
-                    peso = 5;
-                    break;
-                case objetos.telvisores:
-                    peso = 11;
-                    break;
-            }
-            return peso;
-
+            return obj.pesoobjeto;
+            
         }
     }
 
-    
+    public class electrodomesticos
+    {
+       protected eTipoProducto tipo;
+        public eTipoProducto tipoobjeto
+        {
+            get { return tipo; }
+            set { }
+        }
+        protected string marca;
+        public string marcaobjeto
+        {
+            get { return marca; }
+            set { }
+        }
+        protected int garantia;
+        public int garantiaobjeto
+        {
+            get { return garantia; }
+            set { }
+        }
+        protected int peso;
+        public int pesoobjeto
+        {
+            get { return peso; }
+            set { }
+        }
+
+       protected int volumen;
+        public int volumenobjeto
+        {
+            get { return volumen; }
+            set { }
+        }
+
+        
+
+    }
+
+
+    //hijas de electrodomestico
+    public class licuadora : electrodomesticos
+    {
+        public licuadora(int peso_, int volumen_,string marca_,int garan,eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class televisor : electrodomesticos
+    {
+        public televisor(int peso_, int volumen_, string marca_, int garan,eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class exprimidor : electrodomesticos
+    {
+        public exprimidor(int peso_, int volumen_, string marca_, int garan,eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class rallador : electrodomesticos
+    {
+        public rallador(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class tostadora : electrodomesticos
+    {
+        public tostadora(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class cafetera : electrodomesticos
+    {
+        public cafetera(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class molinillos : electrodomesticos
+    {
+        public molinillos(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class cocina: electrodomesticos
+    {
+        public cocina(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class calefon : electrodomesticos
+    {
+        public calefon(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class termotanque : electrodomesticos
+    {
+        public termotanque(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class lavaropa: electrodomesticos
+    {
+        public lavaropa(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class secarropa : electrodomesticos
+    {
+        public secarropa(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class heladera : electrodomesticos
+    {
+        public heladera(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class microondas : electrodomesticos
+    {
+        public microondas(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class freezer : electrodomesticos
+    {
+        public freezer(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class computadora : electrodomesticos
+    {
+        public computadora(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class impresora: electrodomesticos
+    {
+        public impresora(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
+
+    public class accesorio : electrodomesticos
+    {
+        public accesorio(int peso_, int volumen_, string marca_, int garan, eTipoProducto tipo_)
+        {
+            peso = peso_;
+            volumen = volumen_;
+            marca = marca_;
+            garantia = garan;
+            tipo = tipo_;
+        }
+    }
 
 }
 
@@ -646,12 +831,194 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
 
     }
 
+    //revisar!!
     static int[,] llenar_matriz_con_distancias(List<eLocalidad> lista_localidades, int barrios)
     {
         
         //esta es la matriz que ya esta predeterminada, tiene todas las distancias de cada localidad a localidad
         int[,] matriz_definitiva = new int[25, 25];
+        List<int> list_liniers = new List<int>() { 6, 11, 17, 5, 18, 19, 21, 3, 2, 4, 7, 8, 9, 10, 12, 13, 20, 14, 27, 15, 16, 18, 25, 23 };
+        List<int> list_tresfebrero = new List<int>() { 7,14,26,21,19,23,3,6,9,5,8,10,13,4,11,15,22,23,12,17,2524,16 };
+        List<int> list_sanmartin = new List<int>() {12,30,26,24,28,8,13,15,9,16,17,18,5,6,14,16,20,19,12,27,29,8 };
+        List<int> list_vicentelopez = new List<int>() {40,33,31,20,15,18,21,16,19,22,25,12,8,6,10,12,16,30,15,24,23};
+        List<int> list_lamatanza = new List<int>() {31,30,24,5,22,20,7,28,8,10,9,14,23,27,29,13,11,21,24,17 };
+        List<int> list_lomasdezamora = new List<int>() { 9,30,20,21,15,23,19,16,13,24,28,36,25,43,20,17,27,28,24};
+        List<int> list_lanus = new List<int>() {6,17,14,15,16,1,13,12,21,26,2,18,15,18,12,13,10,20 };
+        List<int> list_avellaneda = new List<int>() {20,17,18,19,3,16,15,25,29,37,15,8,12,16,7,4,26 };
+        List<int> list_versalles = new List<int>() {2,5,3,4,8,9,5,11,18,12,24,8,11,20,19,10 };
+        List<int> list_villaluro = new List<int>() {4,3,2,4,6,8,11,10,12,27,13,5,15,16,9 };
+        List<int> list_mataderos = new List<int>() { 6,4,2,3,9,14,22,13,30,8,5,17,18,11};
+        List<int> list_montecastro = new List<int>() {2,5,10,3,8,10,9,24,7,5,18,20,7 };
+        List<int> list_velez = new List<int>() { 2,4,3,10,11,8,14,5,3,15,16,6};
+        List<int> list_parqueavellaneda = new List<int>() { 4,6,13,12,10,16,6,3,14,15,9};
+        List<int> list_villadevoto = new List<int>() {12,20,27,15,35,10,7,16,17,16 };
+        List<int> list_villaurquiza = new List<int>() { 5,8,10,21,9,8,23,24,7};
+        List<int> list_belgrano = new List<int>() {4,7,18,8,19,27,29,5 };
+        List<int> list_palermo = new List<int>() { 4,8,7,11,3,16,4};
+        List<int> list_retiro = new List<int>() { 5,4,10,9,14,2};
+        List<int> list_caballito = new List<int>() {8,12,4,7,8 };
+        List<int> list_flores = new List<int>() {4,8,10,5 };
+        List<int> list_puertomadero = new List<int>() {10,15,8 };
+        List<int> list_laboca = new List<int>() { 3,13};
+        //charcarita ->14
 
+        int pos = 0;
+        for(int i = 0; i < lista_localidades.Count; i++)
+        {
+            matriz_definitiva[i, i] = 0;//pongo a la diagonal en 0
+            //lleno matriz
+            pos = i;
+            switch (i)
+            {
+                case 0:
+                    for (int h = 0; h < list_liniers.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_liniers.ElementAt(h);
+                    }
+                    break;
+
+                case 1:
+                    for (int h = 0; h < list_tresfebrero.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_tresfebrero.ElementAt(h);
+                    }
+                    break;
+
+                case 2:
+                    for (int h = 0; h < list_sanmartin.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_sanmartin.ElementAt(h);
+                    }
+
+                    break;
+                case 3:
+                    for (int h = 0; h < list_vicentelopez.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_vicentelopez.ElementAt(h);
+                    }
+                    break;
+                case 4:
+                    for (int h = 0; h < list_lamatanza.Count; i++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_lamatanza.ElementAt(h);
+                    }
+                    break;
+                case 5:
+                    for (int h = 0; h < list_lomasdezamora.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_lomasdezamora.ElementAt(h);
+                    }
+                    break;
+                case 6:
+                    for (int h = 0; h < list_lanus.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_lanus.ElementAt(h);
+                    }
+                    break;
+                case 7:
+                    for (int h = 0; h < list_avellaneda.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_avellaneda.ElementAt(h);
+                    }
+                    break;
+                case 8:
+                    for (int h = 0; h < list_versalles.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_versalles.ElementAt(h);
+                    }
+                    break;
+                case 9:
+                    for (int h = 0; h < list_villaluro.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_villaluro.ElementAt(h);
+                    }
+                    break;
+                case 10:
+                    for (int h = 0; h < list_mataderos.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_mataderos.ElementAt(h);
+                    }
+                    break;
+                case 11:
+                    for (int h = 0; h < list_montecastro.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_montecastro.ElementAt(h);
+                    }
+                    break;
+                case 12:
+                    for (int h = 0; h < list_velez.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_velez.ElementAt(h);
+                    }
+                    break;
+                case 13:
+                    for (int h = 0; h < list_parqueavellaneda.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_parqueavellaneda.ElementAt(h);
+                    }
+                    break;
+                case 14:
+                    for (int h = 0; h < list_villadevoto.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_villadevoto.ElementAt(h);
+                    }
+                    break;
+                case 15:
+                    for (int h = 0; h < list_villaurquiza.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_villaurquiza.ElementAt(h);
+                    }
+                    break;
+                case 16:
+                    for (int h = 0; h < list_belgrano.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_belgrano.ElementAt(h);
+                    }
+                    break;
+                case 17:
+                    for (int h = 0; h < list_palermo.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_palermo.ElementAt(h);
+                    }
+                    break;
+                case 18:
+                    for (int h = 0; h < list_retiro.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_retiro.ElementAt(h);
+                    }
+                    break;
+                case 19:
+                    for (int h = 0; h < list_caballito.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_caballito.ElementAt(h);
+                    }
+                    break;
+                case 20:
+                    for (int h = 0; h < list_flores.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_flores.ElementAt(h);
+                    }
+                    break;
+                case 21:
+                    for (int h = 0; h < list_puertomadero.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_puertomadero.ElementAt(h);
+                    }
+                    break;
+                case 22:
+                    for (int h = 0; h < list_laboca.Count; h++)
+                    {
+                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_laboca.ElementAt(h);
+                    }
+                    break;
+                case 23:
+
+                    matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = 14;
+
+                    break; 
+                
+            }
+        }
         //llenarla
 
 
@@ -918,7 +1285,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         int cont = 0;
         for(int i = 0; i < pedido_del_dia.cantidad_objetos; i++)
         {
-            if (pedido_del_dia.compra_objetos[i] == objetos.telvisores)
+            if (pedido_del_dia.compra_objetos[i].GetType() == typeof(televisor))//si el objeto es un televisor
                 cont++;
         }
         return cont;
@@ -930,7 +1297,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         for (int i = 0; i < pedido_del_dia.cantidad_objetos; i++)
         {
             //si es un electrodomestico pequeño
-            if (pedido_del_dia.compra_objetos[i] == objetos.licuadora || pedido_del_dia.compra_objetos[i] == objetos.exprimidor || pedido_del_dia.compra_objetos[i] == objetos.rallador || pedido_del_dia.compra_objetos[i] == objetos.tostadora || pedido_del_dia.compra_objetos[i] == objetos.cafetera || pedido_del_dia.compra_objetos[i] == objetos.molinillos)
+            if (pedido_del_dia.compra_objetos[i].GetType() == typeof(licuadora )|| pedido_del_dia.compra_objetos[i].GetType() == typeof(exprimidor) || pedido_del_dia.compra_objetos[i].GetType() == typeof(rallador) || pedido_del_dia.compra_objetos[i].GetType() == typeof(tostadora) || pedido_del_dia.compra_objetos[i].GetType() == typeof(cafetera) || pedido_del_dia.compra_objetos[i].GetType() == typeof(molinillos))
                 cont++;
         }
         if (cont > 0)
