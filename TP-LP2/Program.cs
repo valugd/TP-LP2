@@ -34,8 +34,7 @@ namespace sol_greedy_dinamica
     public enum eOpcion { se_lleno_completo_, se_lleno_pero_quedaron_cosas_de_la_localidad, no_se_lleno };
     public enum entrega { express, normal, diferido };
     public enum objetos { licuadora, exprimidor, rallador, tostadora, cafetera, molinillos, cocinas, calefon, termotanque, lavarropas, secarropas, heladera, microondas, freezer, computadoras, impresoras, accesorios, telvisores };
-     
-   // public enum eVehiculo { camioneta, furgoneta, furgon};
+   
     public enum eTipoProducto { linea_blanca, pequeños_electrodomesticos, electronicos, televisores }
 
     //clases
@@ -51,17 +50,20 @@ namespace sol_greedy_dinamica
         public eTipoProducto tipo_producto
         {
             get { return tipo_producto_compra; }
+            set { }
         }
         List<electrodomesticos> compra;
         public List<electrodomesticos> compra_objetos
         {
             get { return compra; }
+            set { }
         }
 
         int cant_de_objetos;
         public int cantidad_objetos
         {
             get { return cant_de_objetos; }
+            set { }
         }
         eLocalidad barrio_a_entregar;
         public eLocalidad barrio
@@ -87,15 +89,14 @@ namespace sol_greedy_dinamica
         {
             set { }
         }
-        int id_compra;
-        public int id_cliente
-        {
-            get { return id_compra; }
-        }
+
+        
+
         entrega entrega_compra;
         public entrega tipo_entrega
         {
             get { return entrega_compra; }
+            set { }
         }
         //metodos
         public pedido_por_cliente(string nombre_, eLocalidad barrio_, List<electrodomesticos> obj , entrega entrega_compra_)//ver del cuaderno de progra1 cmo era lo de id
@@ -103,9 +104,11 @@ namespace sol_greedy_dinamica
             nombre_cliente = nombre_;
             barrio_a_entregar = barrio_;
             compra = obj;
+            cantidad_objetos = obj.Count;
             volumen_total = calculo_volumen_total(compra);
             peso_total = calculo_peso_total(compra);
             entrega_compra = entrega_compra_;
+
 
         }
 
@@ -386,7 +389,7 @@ namespace sol_greedy_dinamica
         }
     }
 
-
+    //clase vehiculo
     public class eVehiculo
     {
         protected int nafta;
@@ -432,8 +435,6 @@ namespace sol_greedy_dinamica
     }
 
 }
-
-
 
 
 internal class Program
@@ -483,7 +484,7 @@ internal class Program
     //}
 
     
-static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_del_dia_, List<eVehiculo> camiones_del_dia)
+   static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_del_dia_, List<eVehiculo> camiones_del_dia)
     {
         //filtramos la lista completa pasada por parametro en listas de las localidades con pedidos express y normales, y los pedidos express y normales
         List<pedido_por_cliente> pedidos_del_dia_express = Filtrar_por_pedido(pedidos_del_dia_, entrega.express);
@@ -641,6 +642,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
                 if (verificacion_barrios[h] == false)//al primero que entre va a ser el unico que no recorri
                 { orden_clientes.Add(lista_localidad[h]);
                     min = calcular_distancia_barrio_a_liniers(lista_localidad[h]);
+                    verificacion_barrios[h] = true;
                 }
             }
         }
@@ -1293,12 +1295,11 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         return -1;
     }
 
-  
     static List<eLocalidad> encontrar_camino_mas_corto_greedy(int[,] matriz, int barrios_a_recorrer, List<eLocalidad> localidades_en_orden_matriz)
     {
         List<eLocalidad> orden_clientes = new List<eLocalidad>(); //donde vamos a guardar la lista de los barios en orden de ls barrios que tenemos que recorrer
         bool[] verificacion_barrios = new bool[barrios_a_recorrer]; //vector de bool que vamos a usar para saber si un barrio fue recorrido o no, si esta en true (ya lo recorrimos)
-        int h = 1; //para ir llenando orden a clientes
+        int h = 0; //para ir llenando orden a clientes
         int i = 0;
         for(int j = 0; j < barrios_a_recorrer; j++)
         {
