@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Globalization;
+using System.Timers;
 
 namespace sol_greedy_dinamica
 {
@@ -33,8 +34,7 @@ namespace sol_greedy_dinamica
     public enum eLocalidad { Liniers, TresdeFebrero, SanMartin, VicenteLopez, LaMatanza, LomasdeZamora, Lanus, Avellaneda, Versalles, VillaLuro, Mataderos, MonteCastro, VelezSarsfield, ParqueAvellaneda, VillaLugano, VillaDevoto, VillaUrquiza, Belgrano, Palermo, Retiro, Caballito, Flores, PuertoMadero, LaBoca, Chacarita };
     public enum eOpcion { se_lleno_completo_, se_lleno_pero_quedaron_cosas_de_la_localidad, no_se_lleno };
     public enum entrega { express, normal, diferido };
-    public enum objetos { licuadora, exprimidor, rallador, tostadora, cafetera, molinillos, cocinas, calefon, termotanque, lavarropas, secarropas, heladera, microondas, freezer, computadoras, impresoras, accesorios, telvisores };
-   
+    //public enum objetos { licuadora, exprimidor, rallador, tostadora, cafetera, molinillos, cocinas, calefon, termotanque, lavarropas, secarropas, heladera, microondas, freezer, computadoras, impresoras, accesorios, telvisores };
     public enum eTipoProducto { linea_blanca, pequeños_electrodomesticos, electronicos, televisores }
 
     //clases
@@ -392,6 +392,12 @@ namespace sol_greedy_dinamica
     //clase vehiculo
     public class eVehiculo
     {
+        protected float precio_actualventa;
+        public float precio_vehiculo
+        {
+            get { return precio_actualventa; }
+            set { }
+        }
         protected int nafta;
         public int cant_nafta
         {
@@ -409,28 +415,31 @@ namespace sol_greedy_dinamica
 
     public class Camioneta:eVehiculo
     {
-        public Camioneta(int nafta_,int meses)
+        public Camioneta(int nafta_,int meses,float precio)
         {
             cant_nafta = nafta_;
             cant_meses_uso = meses_uso;
+            precio_actualventa = precio;
         }
     }
 
     public class Furgon : eVehiculo
     {
-        public Furgon(int nafta_, int meses)
+        public Furgon(int nafta_, int meses,float precio)
         {
             cant_nafta = nafta_;
             cant_meses_uso = meses_uso;
+            precio_actualventa = precio;
         }
     }
 
     public class Furgoneta : eVehiculo
     {
-        public Furgoneta(int nafta_, int meses)
+        public Furgoneta(int nafta_, int meses,float precio)
         {
             cant_nafta = nafta_;
             cant_meses_uso = meses_uso;
+            precio_actualventa = precio;
         }
     }
 
@@ -439,51 +448,7 @@ namespace sol_greedy_dinamica
 
 internal class Program
 {
-    //no era consigna
-    //GREEDY
-    //static void reparto_greedy(List<pedido_por_cliente> pedidos_del_dia, int[] camiones_del_dia)
-    //{
-
-    //    List<pedido_por_cliente> pedidos_del_dia_tipo_de_pedido = Filtrar_por_pedido(pedidos_del_dia, entrega.express); //filtramos la lista de pedidos total para obtener solo la lista de clientes qeu tienen envio express
-    //    List<eLocalidad> lista_localidad = Lista_Barrios_Ordenada(pedidos_del_dia_tipo_de_pedido); //me va a devolver una lista con los barrios ordenados del mas cercano a liniers al mas alejado
-    //    int barrios_a_recorrer = Barrios_en_pedido_del_dia(pedidos_del_dia_tipo_de_pedido); //la cantidad de barrios que tenemos que recorrer para entregar esos pedidos express
-    //    List<eLocalidad> orden_clientes = new List<eLocalidad>(); //donde vamos a guardar la lista de los barios en orden de ls barrios que tenemos que recorrer
-
-    //    int[,] matriz = new int[barrios_a_recorrer, barrios_a_recorrer];
-    //    matriz = llenar_matriz_con_distancias(lista_localidad, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer, esto es para poder hacer el agoritmo de dkjistra
-    //                                                                                               //basicamente me calcula la distancia entre cada nodo (ya que cada nodo (localidad) tiene direccion bidireccional y conexion con todos los demas nodos
-
-    //    bool[] verificacion_barrios = new bool[barrios_a_recorrer]; //vector de bool que vamos a usar para saber si un barrio fue recorrido o no, si esta en true (ya lo recorrimos)
-    //    int h = 1; //para ir llenando orden a clientes
-    //    int i = 0;
-
-    //    //para calcular el camino -> el mejor camino ¡¡en el momento!! -> algortimo de djkistra
-    //    while (chequeo_verificacion_barrios(verificacion_barrios) != 1) //funcion que me devuelve si ya todos los barrios fueron recorridos o no -> 1 si llegaste al final, 0 si no llegaste al final y -1 si falta un barrio
-    //    {
-    //        int min = min_distancia(matriz, i, verificacion_barrios, barrios_a_recorrer, orden_clientes, lista_localidad);//la funcion me devuelve la distancia minima que va a hacer el camion para ir de un barrio a otro (con este algoritmo va a ir eligiendo siempre la dist minima entre barrio y barrio)
-    //        // tambien la funcion min_distancia me llena la lista orden_clientes poniendome en la pos h el barrio a recorrer, eLocalidad
-    //        i = numero_de_posicion_barrio(orden_clientes.ElementAt(h), lista_localidad); //ahora i va a ser de donde sale el camion, es por eso que apenas entramos al while, es 0, porque siempre sale de liniers, y por eso agarra la ult pos de la lista que va guardando los barrios en orden, pero como orden cliente es eLocalidad, la funcion numero de posicion barrrio te pasa en que posicion de la matriz esta el barrio que recien se recorrio
-    //        h++;
-    //    }
-
-    //    List<pedido_por_cliente> lista_clientes_filtrada_ordenada = new List<pedido_por_cliente>();
-
-    //    lista_clientes_filtrada_ordenada = Ordenar_por_pedidio(orden_clientes, pedidos_del_dia); //me pone los clientes que pertenecen a los barrios a recorrer en orden en la lista, tambien por barrio estan organizados primero los express y despues los normales
-
-    //    int cant_camiones = 0;
-
-    //    //meto todo lo que pueda en una camioneta, y despues sigo con la otra camioneta a partir del otro barrio y asi
-
-    //    while (cant_camiones < camiones_del_dia.Length)
-    //    {
-    //        llenado_despacho_productos(camiones_del_dia[cant_camiones], lista_clientes_filtrada_ordenada); //llena los pedidos en el camion elegido, mientras elimina el barrio recorrido y tambien elimina a los pedidos que se metieron al camion de la lista
-    //        cant_camiones++; //una vez lleno el camion anterior, sigo con el siguiente
-    //    }
-
-
-    //}
-
-    
+ 
    static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_del_dia_, List<eVehiculo> camiones_del_dia)
     {
         //filtramos la lista completa pasada por parametro en listas de las localidades con pedidos express y normales, y los pedidos express y normales
@@ -523,6 +488,7 @@ internal class Program
             viajes = viajes + 2;
         return viajes;
     }
+
     static int numero_de_posicion_barrio(eLocalidad barrio_elegido, List<eLocalidad> lista_localidad)
     {
         int pos = 0;
@@ -533,6 +499,7 @@ internal class Program
         }
         return pos;
     }
+   
     static int chequeo_verificacion_barrios(bool[] verificacion_barrios)
     {
         // devuelve -> 1 si llegaste al final (todos los barrios fueron recorridos), 0 si no llegaste al final (falta mas de un barrio por recorrer) y -1 si falta un barrio (solo falta un barrio por recorrer), -2 si no se recorrio ningun barrio todavia
@@ -877,7 +844,6 @@ internal class Program
 
     }
 
-    
     static int[,] llenar_matriz_con_distancias(List<eLocalidad> lista_localidades, int barrios)
     {
         
@@ -1518,6 +1484,19 @@ internal class Program
             return false;
     }
 
+    static void verificar_devaluacion_camiones(List<eVehiculo> lista_camiones_def)
+    {
+         //sabemos en el pos0 esta la camioneta, en la pos1 el furgon y en la pos2 la furgoneta
+         for(int i = 0; i < lista_camiones_def.Count; i++)
+        {
+            //si el vehiculo tiene 1 año de uso, se desprecia un 25% de su precio
+            if (lista_camiones_def.ElementAt(i).meses_uso==12)//si el vehiculo se uso por un año
+            {
+                lista_camiones_def.ElementAt(i).precio_vehiculo= (float)(lista_camiones_def.ElementAt(i).precio_vehiculo * 0.75);
+                lista_camiones_def.ElementAt(i).meses_uso = 0;
+            }
+        }
+    }
 
     static List<eVehiculo> camiones_disponibles(DateTime dia_hoy,List<eVehiculo> camiones_empresa)
     {
@@ -1553,11 +1532,22 @@ internal class Program
         }
         return vector_camiones;
     }
+    
+    static void sumar_mes_camiones(List<eVehiculo> lista_camiones)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            lista_camiones.ElementAt(i).meses_uso = lista_camiones.ElementAt(0).meses_uso + 1;
+        }
+        verificar_devaluacion_camiones(lista_camiones);
+    }
+
+
     static void Main(string[] args)
     {
-        eVehiculo camioneta = new Camioneta(80, 2);
-        eVehiculo furgon = new Furgon(90, 4);
-        eVehiculo furgoneta = new Furgoneta(60, 9);
+        eVehiculo camioneta = new Camioneta(80, 2,5770000);
+        eVehiculo furgon = new Furgon(90, 4,3950000);
+        eVehiculo furgoneta = new Furgoneta(60, 9,2800000);
 
         List<eVehiculo> lista_camiones_definitiva = new List<eVehiculo>() { camioneta, furgon, furgoneta };
 
@@ -1565,6 +1555,7 @@ internal class Program
         DateTime dia_hoy = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
         // zonaDias = new DateTime(DateTime.Now.AddDays(1).Year, DateTime.Now.AddDays(1).Month, DateTime.Now.AddDays(1).Day, 0, 0, 1);
         lista_de_camiones_diaria = camiones_disponibles(dia_hoy, lista_camiones_definitiva);
+
 
 
 
@@ -1600,5 +1591,14 @@ internal class Program
         //pedido_por_cliente pedido5 = new pedido_por_cliente("Louis Tomlinson", eLocalidad.Chacarita,lista_louis , entrega.normal);
         //pedido_por_cliente pedido6 = new pedido_por_cliente("Ricardo Fort", eLocalidad.PuertoMadero,lista_ricardo , entrega.express);
         // System.Threading.Thread.Sleep(5);
+
+
+        
+        int dia_hoy_chequeo = DateTime.Now.Day;
+        if(dia_hoy_chequeo==1)//si hoy es 1, es que empezo un nuevo mes
+        {
+            sumar_mes_camiones(lista_camiones_definitiva);
+        }
+
     }
 }
