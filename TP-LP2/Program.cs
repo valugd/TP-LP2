@@ -1518,43 +1518,55 @@ internal class Program
             return false;
     }
 
+
     static List<eVehiculo> camiones_disponibles(DateTime dia_hoy,List<eVehiculo> camiones_empresa)
     {
-        List<eVehiculo> vector_camiones=new List<eVehiculo>();
+        List<eVehiculo> vector_camiones = new List<eVehiculo>();
         byte dia = (byte)dia_hoy.DayOfWeek;
-        string dia_string = dia.ToString("dddd", new CultureInfo("es-ES"));//lo convierto en string
-        switch (dia_string)
+        switch (dia)
         {
-            case "lunes":
+            case 1: //lunes
                 vector_camiones.Add(camiones_empresa.ElementAt(0)); //la camioneta
                 vector_camiones.Add(camiones_empresa.ElementAt(1)); //el furgon
                 vector_camiones.Add(camiones_empresa.ElementAt(2)); //la furgoneta
                 break;
-           case "martes":
-                vector_camiones.Add(camiones_empresa.ElementAt(0)); 
+            case 2: //martes
+                vector_camiones.Add(camiones_empresa.ElementAt(0));
                 vector_camiones.Add(camiones_empresa.ElementAt(1));
                 break;
-            case "miercoles":
+            case 3: //miercoles
                 vector_camiones.Add(camiones_empresa.ElementAt(0));
                 vector_camiones.Add(camiones_empresa.ElementAt(2));
                 break;
-            case "jueves":
-                vector_camiones.Add(camiones_empresa.ElementAt(0)); 
+            case 4: //jueves
+                vector_camiones.Add(camiones_empresa.ElementAt(0));
                 vector_camiones.Add(camiones_empresa.ElementAt(1));
                 break;
-            case "viernes":
-                vector_camiones.Add(camiones_empresa.ElementAt(0)); 
+            case 5: //viernes
+                vector_camiones.Add(camiones_empresa.ElementAt(0));
                 vector_camiones.Add(camiones_empresa.ElementAt(1));
                 vector_camiones.Add(camiones_empresa.ElementAt(2));
                 break;
-            case "sabado":
-                vector_camiones.Add(camiones_empresa.ElementAt(0)); 
+            case 6: //sabado
+                vector_camiones.Add(camiones_empresa.ElementAt(0));
                 break;
         }
         return vector_camiones;
     }
     static void Main(string[] args)
     {
+        eVehiculo camioneta = new Camioneta(80, 2);
+        eVehiculo furgon = new Furgon(90, 4);
+        eVehiculo furgoneta = new Furgoneta(60, 9);
+
+        List<eVehiculo> lista_camiones_definitiva = new List<eVehiculo>() { camioneta, furgon, furgoneta };
+
+        List<eVehiculo> lista_de_camiones_diaria = new List<eVehiculo>();
+        DateTime dia_hoy = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+        // zonaDias = new DateTime(DateTime.Now.AddDays(1).Year, DateTime.Now.AddDays(1).Month, DateTime.Now.AddDays(1).Day, 0, 0, 1);
+        lista_de_camiones_diaria = camiones_disponibles(dia_hoy, lista_camiones_definitiva);
+
+
 
         //electrodomesticos cafetera = new cafetera(2, 4, "philips", 2, eTipoProducto.linea_blanca);
         //List<electrodomesticos> lista_taylor = new List<electrodomesticos>();
@@ -1587,6 +1599,6 @@ internal class Program
         //pedido_por_cliente pedido4 = new pedido_por_cliente("Harry Styles", eLocalidad.Caballito,lista_harry , entrega.express);
         //pedido_por_cliente pedido5 = new pedido_por_cliente("Louis Tomlinson", eLocalidad.Chacarita,lista_louis , entrega.normal);
         //pedido_por_cliente pedido6 = new pedido_por_cliente("Ricardo Fort", eLocalidad.PuertoMadero,lista_ricardo , entrega.express);
-
+        // System.Threading.Thread.Sleep(5);
     }
 }
