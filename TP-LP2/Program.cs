@@ -510,8 +510,6 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
 
         }
 
-
-
     }
 
     //funciones 
@@ -877,7 +875,7 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
 
     }
 
-    //revisar!!
+    
     static int[,] llenar_matriz_con_distancias(List<eLocalidad> lista_localidades, int barrios)
     {
         
@@ -909,162 +907,329 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         //charcarita ->14
 
         int pos = 0;
-        for(int i = 0; i < lista_localidades.Count; i++)
+        for (int i = 0; i < 25; i++)
         {
             matriz_definitiva[i, i] = 0;//pongo a la diagonal en 0
-            //lleno matriz
+                                        //lleno matriz
             pos = i;
             switch (i)
             {
                 case 0:
+
                     for (int h = 0; h < list_liniers.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_liniers.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_liniers.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_liniers.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_liniers.ElementAt(h);
                     }
                     break;
 
                 case 1:
+
                     for (int h = 0; h < list_tresfebrero.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_tresfebrero.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_tresfebrero.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_tresfebrero.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_tresfebrero.ElementAt(h);
                     }
                     break;
 
                 case 2:
+
                     for (int h = 0; h < list_sanmartin.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_sanmartin.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_sanmartin.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_sanmartin.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_sanmartin.ElementAt(h);
                     }
 
                     break;
                 case 3:
+
                     for (int h = 0; h < list_vicentelopez.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_vicentelopez.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_vicentelopez.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_vicentelopez.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_vicentelopez.ElementAt(h);
                     }
                     break;
                 case 4:
-                    for (int h = 0; h < list_lamatanza.Count; i++)
+                    for (int h = 0; h < list_lamatanza.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_lamatanza.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_lamatanza.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_lamatanza.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_lamatanza.ElementAt(h);
                     }
                     break;
                 case 5:
                     for (int h = 0; h < list_lomasdezamora.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_lomasdezamora.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_lomasdezamora.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_lomasdezamora.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_lomasdezamora.ElementAt(h);
                     }
                     break;
                 case 6:
+
                     for (int h = 0; h < list_lanus.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_lanus.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_lanus.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_lanus.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_lanus.ElementAt(h);
                     }
                     break;
                 case 7:
                     for (int h = 0; h < list_avellaneda.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_avellaneda.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_avellaneda.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_avellaneda.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_avellaneda.ElementAt(h);
                     }
                     break;
                 case 8:
                     for (int h = 0; h < list_versalles.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_versalles.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_versalles.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_versalles.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_versalles.ElementAt(h);
                     }
                     break;
                 case 9:
                     for (int h = 0; h < list_villaluro.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_villaluro.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_villaluro.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_villaluro.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_villaluro.ElementAt(h);
                     }
                     break;
                 case 10:
                     for (int h = 0; h < list_mataderos.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_mataderos.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_mataderos.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_mataderos.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_mataderos.ElementAt(h);
                     }
                     break;
                 case 11:
                     for (int h = 0; h < list_montecastro.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_montecastro.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_montecastro.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_montecastro.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_montecastro.ElementAt(h);
                     }
                     break;
                 case 12:
                     for (int h = 0; h < list_velez.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_velez.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_velez.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_velez.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_velez.ElementAt(h);
                     }
                     break;
                 case 13:
                     for (int h = 0; h < list_parqueavellaneda.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_parqueavellaneda.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_parqueavellaneda.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_parqueavellaneda.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_parqueavellaneda.ElementAt(h);
                     }
                     break;
                 case 14:
                     for (int h = 0; h < list_villadevoto.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_villadevoto.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_villadevoto.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_villadevoto.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_villadevoto.ElementAt(h);
                     }
                     break;
                 case 15:
                     for (int h = 0; h < list_villaurquiza.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_villaurquiza.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_villaurquiza.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_villaurquiza.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_villaurquiza.ElementAt(h);
                     }
                     break;
                 case 16:
                     for (int h = 0; h < list_belgrano.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_belgrano.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_belgrano.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_belgrano.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_belgrano.ElementAt(h);
                     }
                     break;
                 case 17:
                     for (int h = 0; h < list_palermo.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_palermo.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_palermo.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_palermo.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_palermo.ElementAt(h);
                     }
                     break;
                 case 18:
                     for (int h = 0; h < list_retiro.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_retiro.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_retiro.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_retiro.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_retiro.ElementAt(h);
                     }
                     break;
                 case 19:
                     for (int h = 0; h < list_caballito.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_caballito.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_caballito.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_caballito.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_caballito.ElementAt(h);
                     }
                     break;
                 case 20:
                     for (int h = 0; h < list_flores.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_flores.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_flores.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_flores.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_flores.ElementAt(h);
                     }
                     break;
                 case 21:
                     for (int h = 0; h < list_puertomadero.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_puertomadero.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_puertomadero.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_puertomadero.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_puertomadero.ElementAt(h);
                     }
                     break;
                 case 22:
                     for (int h = 0; h < list_laboca.Count; h++)
                     {
-                        matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = list_laboca.ElementAt(h);
+                        pos++;
+                        matriz_definitiva[i, pos] = list_laboca.ElementAt(h);
+                    }
+                    pos = i;
+                    for (int h = 0; h < list_laboca.Count; h++)
+                    {
+                        pos++;
+                        matriz_definitiva[pos, i] = list_laboca.ElementAt(h);
                     }
                     break;
                 case 23:
+                    pos++;
+                    matriz_definitiva[i, pos] = 14;
+                    matriz_definitiva[pos, i] = 14;
 
-                    matriz_definitiva[i, pos++] = matriz_definitiva[pos++, i] = 14;
-
-                    break; 
-                
+                    break;
             }
         }
+
         //llenarla
 
 
@@ -1076,13 +1241,13 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
         int barrio_fijo = 0;
         for(int i=0;i<barrios; i++)
         {
-            barrio_fijo = num_asignado_barrio(lista_localidades[i]);
+            barrio_fijo = num_asignado_barrio(lista_localidades.ElementAt(0));
             num_barrios_en_matriz[i] = barrio_fijo;
         }
         //tengo un vector con los numeros de los barrios que necesito correspondiente a la matriz ya definida
    
         
-        for(int i = 0; i < barrio_fijo; i++)
+        for(int i = 0; i < lista_localidades.Count; i++)
         {
            for (int pos_barrios = 0; pos_barrios < barrios; pos_barrios++)
                 {
@@ -1102,28 +1267,28 @@ static void preparo_y_desapacho_de_productos(List<pedido_por_cliente> pedidos_de
             case eLocalidad.Liniers: return 0;
             case eLocalidad.TresdeFebrero: return 1;
             case eLocalidad.SanMartin: return 2;
-            case eLocalidad.VicenteLopez: return 2;
-            case eLocalidad.LaMatanza: return 2;
-            case eLocalidad.LomasdeZamora: return 2;
-            case eLocalidad.Lanus: return 2;
-            case eLocalidad.Avellaneda: return 2;
-            case eLocalidad.Versalles: return 2;
-            case eLocalidad.VillaLuro: return 2;
-            case eLocalidad.Mataderos: return 2;
-            case eLocalidad.MonteCastro: return 2;
-            case eLocalidad.VelezSarsfield: return 2;
-            case eLocalidad.ParqueAvellaneda: return 2;
-            case eLocalidad.VillaLugano: return 2;
-            case eLocalidad.VillaDevoto: return 2;
-            case eLocalidad.VillaUrquiza: return 2;
-            case eLocalidad.Belgrano: return 2;
-            case eLocalidad.Palermo: return 2;
-            case eLocalidad.Retiro: return 2;
-            case eLocalidad.Caballito: return 2;
-            case eLocalidad.Flores: return 2;
-            case eLocalidad.PuertoMadero: return 2;
-            case eLocalidad.LaBoca: return 2;
-            case eLocalidad.Chacarita: return 2;
+            case eLocalidad.VicenteLopez: return 3;
+            case eLocalidad.LaMatanza: return 4;
+            case eLocalidad.LomasdeZamora: return 5;
+            case eLocalidad.Lanus: return 6;
+            case eLocalidad.Avellaneda: return 7;
+            case eLocalidad.Versalles: return 8;
+            case eLocalidad.VillaLuro: return 9;
+            case eLocalidad.Mataderos: return 10;
+            case eLocalidad.MonteCastro: return 11;
+            case eLocalidad.VelezSarsfield: return 12;
+            case eLocalidad.ParqueAvellaneda: return 13;
+            case eLocalidad.VillaLugano: return 14;
+            case eLocalidad.VillaDevoto: return 15;
+            case eLocalidad.VillaUrquiza: return 16;
+            case eLocalidad.Belgrano: return 17;
+            case eLocalidad.Palermo: return 18;
+            case eLocalidad.Retiro: return 19;
+            case eLocalidad.Caballito: return 20;
+            case eLocalidad.Flores: return 21;
+            case eLocalidad.PuertoMadero: return 22;
+            case eLocalidad.LaBoca: return 23;
+            case eLocalidad.Chacarita: return 24;
         }
         return -1;
     }
