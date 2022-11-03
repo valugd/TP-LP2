@@ -43,6 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="cCamioneta.cs" />
+    <Compile Include="cCosiMundo.cs" />
+    <Compile Include="cElectrodomesticos.cs" />
+    <Compile Include="cElectronicos.cs" />
+    <Compile Include="cFurgon.cs" />
+    <Compile Include="cFurgoneta.cs" />
+    <Compile Include="cLineaBlanca.cs" />
+    <Compile Include="cPedido_por_Cliente.cs" />
+    <Compile Include="cPequeños_electrodomesticos.cs" />
+    <Compile Include="cTelevisores.cs" />
+    <Compile Include="cVehiculo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
