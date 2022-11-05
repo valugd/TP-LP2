@@ -55,8 +55,8 @@ namespace sol_greedy_dinamica
         {
             this.nafta = nafta;
             this.cant_meses_uso = meses_;
-            this.nafta = nafta;
-            elevador = false;
+            this.precio_actualventa = precio;
+            elevador_ = false;
             
         }
 

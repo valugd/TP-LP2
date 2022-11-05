@@ -16,12 +16,7 @@ namespace sol_greedy_dinamica
         {
             get { return nombre_cliente; }
         }
-        eTipoProducto tipo_producto_compra;
-        public eTipoProducto tipo_producto
-        {
-            get { return tipo_producto_compra; }
-            set { }
-        }
+       
         List<cElectrodomesticos> compra;
         public List<cElectrodomesticos> compra_objetos
         {
@@ -74,7 +69,7 @@ namespace sol_greedy_dinamica
             nombre_cliente = nombre_;
             barrio_a_entregar = barrio_;
             compra = obj;
-            cantidad_objetos = obj.Count;
+            cant_de_objetos = obj.Count;
             volumen_total = calculo_volumen_total(compra);
             peso_total = calculo_peso_total(compra);
             entrega_compra = entrega_compra_;

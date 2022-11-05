@@ -24,8 +24,8 @@ namespace sol_greedy_dinamica
 
         public cCosiMundo(List<cPedido_por_Cliente> listpedidos, List<cVehiculo> listcamiones)
         {
-            this.listaPedidos = listpedidos;
-            this.listaCamiones = listcamiones;
+            this.lista_pedidos = listpedidos;
+            this.lista_camiones = listcamiones;
         }
 
         public void preparo_y_desapacho_de_productos()
@@ -43,7 +43,7 @@ namespace sol_greedy_dinamica
             cVehiculo camion = this.lista_camiones.ElementAt(0); //siempre empezamos con la camioneta
             int cont_camiones = 0;
             int max_viajes = max_viajes_por_dia();
-            while (cont_camiones < max_viajes && (lista_localidades_express != null || lista_localidades_normal != null))
+            while (cont_camiones < max_viajes && (pedidos_del_dia_express.Count != 0 || pedidos_del_dia_normales.Count != 0))
             {//hasta que no haya mas camiones o haya despachado todos los productos
                 despacho_de_productos(lista_localidades_normal, pedidos_del_dia_express, pedidos_del_dia_normales, lista_localidades_express, pedido_a_entregar, camion); //calculo el mejor camino, y despacho todos los paquetes posibles, dandole prioridad a los express
                 cont_camiones++;//se lleno el camion anterior, uso el siguiente
@@ -62,7 +62,7 @@ namespace sol_greedy_dinamica
             int viajes = 4;  //la camioneta siemrpe sale por lo que siempre voy a tener 4 viajes minimo
             if (this.lista_camiones.Count == 2) //si solo sale el furgon o la furgoneta mas la camioneta
                 viajes++;
-            if (this.lista_camiones.Count == 2) //si salen los 3 vehiculos
+            if (this.lista_camiones.Count == 3) //si salen los 3 vehiculos
                 viajes = viajes + 2;
             return viajes;
         }
@@ -103,7 +103,7 @@ namespace sol_greedy_dinamica
             List<cPedido_por_Cliente> aux = new List<cPedido_por_Cliente>();
             for (int i = 0; i < lista_pedido.Count; i++)
             {
-                aux.Add(lista_pedido.ElementAt(0));
+                aux.Add(lista_pedido.ElementAt(i));
             }
 
             int cont = 0;
@@ -112,13 +112,12 @@ namespace sol_greedy_dinamica
             for (int i = 0; i < lista_pedido.Count; i++)
             {
                 flag = false;
-                for (int h = i + 1; h < lista_pedido.Count; h++)
+                for (int h = i; h < lista_pedido.Count; h++)
                 {//cuento solo una vez (con ayuda del flag) al barrio y todos los clientes que encuentre que van al mismo barrio los elimino de la lista auxiliar
                  //notar que la lista original no se modifica, solo la auxiliar
-                    if (aux[i].barrio == aux[h].barrio && flag == false)
+                    if ( flag == false)
                     {
                         flag = true;
-                        aux.RemoveAt(h);
                         cont++;
                     }
                     else if (aux[i].barrio == aux[h].barrio)
@@ -218,13 +217,14 @@ namespace sol_greedy_dinamica
         static void despacho_de_productos(List<eLocalidad> lista_localidades_normal, List<cPedido_por_Cliente> pedidos_del_dia_express, List<cPedido_por_Cliente> pedidos_del_dia_normales, List<eLocalidad> lista_localidades_express, List<cPedido_por_Cliente> pedido_a_entregar, cVehiculo camion)
         {//las listas de localidades estan ordenadas por orden de menor distancia a liniers a mayor
             eOpcion chequeo_camion_lleno = eOpcion.no_se_lleno;
+            List<int> volypeso = new List<int> { 0, 0 };
             List<eLocalidad> camino_mas_corto = new List<eLocalidad>();
 
-            if (lista_localidades_express == null) //si no hay mas localidades express, es decir ya recorri todas las express, sigo con los pedidos normales
+            if (lista_localidades_express.Count== 0) //si no hay mas localidades express, es decir ya recorri todas las express, sigo con los pedidos normales
             {
                 while (chequeo_camion_lleno == eOpcion.no_se_lleno && lista_localidades_normal != null)
                 { //mientras que el camion no este lleno o mientras siga habiendo locaclidades que recorrer
-                    chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, camion, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
+                    chequeo_camion_lleno = intento_llenar_camion(volypeso,lista_localidades_normal[0], pedidos_del_dia_normales, camion, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
 
                     if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
                         lista_localidades_normal.RemoveAt(0);
@@ -244,17 +244,17 @@ namespace sol_greedy_dinamica
             else
             {
                 //si todavia hay pedidos express para entregar
-                while (chequeo_camion_lleno == eOpcion.no_se_lleno && lista_localidades_express != null)
+                while (chequeo_camion_lleno == eOpcion.no_se_lleno && lista_localidades_express.Count != 0)
                 { //mientras haya locaclidades express que recorrer y el camion este vacio
 
-                    chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, camion, pedido_a_entregar);
+                    chequeo_camion_lleno = intento_llenar_camion(volypeso,lista_localidades_express[0], pedidos_del_dia_express, camion, pedido_a_entregar);
 
                     if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
-                        lista_localidades_normal.RemoveAt(0);
+                        lista_localidades_express.RemoveAt(0);
 
                     //si despues de poner lo ultimo en el camion de lo express este no se lleno, lo relleno con productos de tipo entrega normal
-                    if (lista_localidades_express == null && chequeo_camion_lleno == eOpcion.no_se_lleno)
-                        rellenar_camion(lista_localidades_normal, pedido_a_entregar, pedidos_del_dia_normales, camion);
+                    if (lista_localidades_express.Count == 0 && lista_localidades_normal.Count != 0 && chequeo_camion_lleno == eOpcion.no_se_lleno)
+                        rellenar_camion(volypeso,lista_localidades_normal, pedido_a_entregar, pedidos_del_dia_normales, camion);
                     //llenamos el camion con los pedidos normales de las zonas mas cercanas a liniers -> eliminamos esas localidades de la lista ya directamente adentro de la funcion, al igual que los pedidos incluidos
                 }
 
@@ -272,14 +272,14 @@ namespace sol_greedy_dinamica
 
             //despues de pasar por los if, ya tengo la lista de pedidos a entregar y la lista de barrios a recorrer en orden 
             //primero ordena por barrio, poniendo primero a los del primer barrio a recorrer y después los del último barrio. 
-            Ordenar_por_pedidio(camino_mas_corto, pedido_a_entregar);
+            pedido_a_entregar= Ordenar_por_pedidio(camino_mas_corto, pedido_a_entregar);
 
             llenado_despacho_productos(camion, pedido_a_entregar); //esta funcion me va a llenar el camión que yo le pase por parámetro, con los pedidos de las localidades seleccionadas
 
 
 
         }
-        static void Ordenar_por_pedidio(List<eLocalidad> camino_mas_corto, List<cPedido_por_Cliente> pedido_a_entregar)
+        static List<cPedido_por_Cliente> Ordenar_por_pedidio(List<eLocalidad> camino_mas_corto, List<cPedido_por_Cliente> pedido_a_entregar)
         {
             List<cPedido_por_Cliente> pedidos_ordenados = new List<cPedido_por_Cliente>();
             List<cPedido_por_Cliente> aux = new List<cPedido_por_Cliente>();
@@ -294,38 +294,38 @@ namespace sol_greedy_dinamica
                         aux.Add(pedido_a_entregar[h]);
                 }
 
-                Ordenar_por_prioridad_pedido(aux); //esta funcion me pone primero los pedidos express y despues los normales de la localidad que acabo de llenar
+                //Ordenar_por_prioridad_pedido(aux); //esta funcion me pone primero los pedidos express y despues los normales de la localidad que acabo de llenar
 
                 for (int n = 0; n < aux.Count; n++)
                 {
                     pedidos_ordenados.Add(aux.ElementAt(n)); //agrego los pedidos de la localidad recien ordenada en la lista que vamos a devolver
                 }
             }
-            pedido_a_entregar = pedidos_ordenados;
+            return pedidos_ordenados;
 
         }
 
-        static void Ordenar_por_prioridad_pedido(List<cPedido_por_Cliente> lista)
-        {
-            //primero ordena por express y luego normales y luego diferidos
-            List<cPedido_por_Cliente> aux = new List<cPedido_por_Cliente>();
-            for (int i = 0; i < lista.Count; i++)
-            {
-                if (lista[i].tipo_entrega == entrega.express)
-                {
-                    //meto el pedido express a la lista auxiliar y la elimino de la original
-                    aux.Add(lista[i]);
-                    lista.RemoveAt(i);
-                }
-            }
-            //para cuando salga del for, voy a tener en la lista aux solo los pedidos express y en la lista original los normales, ahora agrego los normales a la lista auxiliar (al final)
-            for (int i = 0; i < lista.Count; i++)
-            {
-                aux.Add(lista[i]);
-            }
+        //static void Ordenar_por_prioridad_pedido(List<cPedido_por_Cliente> lista)
+        //{
+        //    //primero ordena por express y luego normales y luego diferidos
+        //    List<cPedido_por_Cliente> aux = new List<cPedido_por_Cliente>();
+        //    for (int i = 0; i < lista.Count; i++)
+        //    {
+        //        if (lista[i].tipo_entrega == entrega.express)
+        //        {
+        //            //meto el pedido express a la lista auxiliar y la elimino de la original
+        //            aux.Add(lista[i]);
+        //            lista.RemoveAt(i);
+        //        }
+        //    }
+        //    //para cuando salga del for, voy a tener en la lista aux solo los pedidos express y en la lista original los normales, ahora agrego los normales a la lista auxiliar (al final)
+        //    for (int i = 0; i < lista.Count; i++)
+        //    {
+        //        aux.Add(lista[i]);
+        //    }
 
-            lista = aux; //ahora la lista esta ordenada por primero express y despues normales
-        }
+        //    lista = aux; //ahora la lista esta ordenada por primero express y despues normales
+        //}
         static void llenado_despacho_productos(cVehiculo camion, List<cPedido_por_Cliente> lista_completa_pedidos)
         {
             //lista pedidos esta fltrada por solo las zonas que estan en el recorrido y primero estan puestos los del envio express, esto lo hacemos desde las funciones en donde llamamos a esta funcion, es por esto que siempre agarramos la posicion 0, porque vamos eliminando al primero despues de meterlo al camion -> siempre el primero de la lista es el que tenemos que meter primero
@@ -337,11 +337,12 @@ namespace sol_greedy_dinamica
             {//las camionetas no tiene limite de peso, solo de volumen
                 while (volumen_aux < camion.volumen_max) //mientras que el volumen que tiene sea menor que el max de la camioneta
                 {
-                    if (volumen_aux + lista_completa_pedidos[0].volumen <= camion.volumen_max) //cheque que si le sumo el paquete siguiente no supere el volumen total.
+                    if (lista_completa_pedidos.Count!=0 && volumen_aux + lista_completa_pedidos[0].volumen <= camion.volumen_max) //cheque que si le sumo el paquete siguiente no supere el volumen total.
                     {
                         pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]); //lo agregamos a la cola
-                        lista_completa_pedidos.RemoveAt(0); //sacamos a ese pedido de la lista
                         volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen; //sumamos el volumen
+                        lista_completa_pedidos.RemoveAt(0); //sacamos a ese pedido de la lista
+                       
                     }
                     else
                         volumen_aux = camion.volumen_max;//si ya sumandole el prox paquete, supero el peso del camion, le impongo que el peso es el max para que salga del while
@@ -352,12 +353,13 @@ namespace sol_greedy_dinamica
             {//en este caso chequeamos tanto el volumen total y el peso total 
                 while (volumen_aux < camion.volumen_max && peso_aux < camion.peso_max)
                 {
-                    if (volumen_aux + lista_completa_pedidos[0].volumen < camion.volumen_max && (peso_aux + lista_completa_pedidos[0].peso_pedido) < camion.peso_max)
+                    if (lista_completa_pedidos.Count != 0 && volumen_aux + lista_completa_pedidos[0].volumen < camion.volumen_max && (peso_aux + lista_completa_pedidos[0].peso_pedido) < camion.peso_max)
                     {
                         pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]);
-                        lista_completa_pedidos.RemoveAt(0);
                         volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen;
                         peso_aux = peso_aux + lista_completa_pedidos[0].peso_pedido;
+                        lista_completa_pedidos.RemoveAt(0);
+                       
                     }
                     else
                     {
@@ -372,12 +374,13 @@ namespace sol_greedy_dinamica
             {//en este caso chequeamos tanto el volumen total y el peso total
                 while (volumen_aux < camion.volumen_max && peso_aux < camion.peso_max)
                 {
-                    if (volumen_aux + lista_completa_pedidos[0].volumen < camion.volumen_max && (peso_aux + lista_completa_pedidos[0].peso_pedido) < camion.peso_max)
+                    if (lista_completa_pedidos.Count != 0 && volumen_aux + lista_completa_pedidos[0].volumen < camion.volumen_max && (peso_aux + lista_completa_pedidos[0].peso_pedido) < camion.peso_max)
                     {
                         pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]);
-                        lista_completa_pedidos.RemoveAt(0);
                         volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen;
                         peso_aux = peso_aux + lista_completa_pedidos[0].peso_pedido;
+                        lista_completa_pedidos.RemoveAt(0);
+                        
                     }
                     else
                     {
@@ -415,15 +418,17 @@ namespace sol_greedy_dinamica
             //ahora saco los repetidos
             for (int i = 0; i < pedidos_del_dia_tipo_de_pedido.Count; i++)
             {
-                for (int j = 1; j < pedidos_del_dia_tipo_de_pedido.Count; j++)
-                {
-                    if (aux.ElementAt(i) == aux.ElementAt(j))
-                        aux.RemoveAt(j);
-                }
+                
+                    for (int j = 1; j < pedidos_del_dia_tipo_de_pedido.Count; j++)
+                    {
+                        if (aux.ElementAt(i) == aux.ElementAt(j) && i !=j)
+                            aux.RemoveAt(j);
+                    }
+                
             }
 
             //ahora aux tiene la lista de localidades 
-
+ 
             for (int x = 0; x < aux.Count; x++)
             {
 
@@ -434,8 +439,8 @@ namespace sol_greedy_dinamica
                     if (calcular_distancia_barrio_a_liniers(aux.ElementAt(y)) > calcular_distancia_barrio_a_liniers(aux.ElementAt(y + 1)))
                     { //distancia liniers es una funcion que le pasas una localidad y te pasa la distancia de esa localidad a liniers
                         eLocalidad temporal = aux.ElementAt(y);
-                        aux.Insert(y, aux.ElementAt(y + 1));
-                        aux.Insert(y + 1, temporal);
+                        aux[y] =aux.ElementAt(y + 1);
+                        aux[y+1] = temporal;
                     }
                 }
             }
@@ -808,7 +813,7 @@ namespace sol_greedy_dinamica
             int barrio_fijo = 0;
             for (int i = 0; i < barrios; i++)
             {
-                barrio_fijo = num_asignado_barrio(lista_localidades.ElementAt(0));
+                barrio_fijo = num_asignado_barrio(lista_localidades.ElementAt(i));
                 num_barrios_en_matriz[i] = barrio_fijo;
             }
             //tengo un vector con los numeros de los barrios que necesito correspondiente a la matriz ya definida
@@ -881,7 +886,7 @@ namespace sol_greedy_dinamica
             return orden_clientes;
         }
 
-        static eOpcion intento_llenar_camion(eLocalidad localidad, List<cPedido_por_Cliente> pedidos_del_dia, cVehiculo camion, List<cPedido_por_Cliente> pedido_a_entregar)
+        static eOpcion intento_llenar_camion(List<int> volypeso,eLocalidad localidad, List<cPedido_por_Cliente> pedidos_del_dia, cVehiculo camion, List<cPedido_por_Cliente> pedido_a_entregar)
         {
 
             //llena el camion con los pedidos de la locacalidad pasada como paremetro, si logra llenar con todos los pedidos de la localidad y sigue habiendo espacio, devuelve que no se lleno. Si logra poner TODOS los pedidos de la localidad y no queda espacio, es decir, el volumen que ya lleno el camion es igual o mayor que el volumen total sin la caja mas pequeña de entrega entonces devuelvo que se llenó completo
@@ -889,8 +894,7 @@ namespace sol_greedy_dinamica
             //de esta manera, el camion siempre va a salir lo mas lleno posible
             eOpcion estado = eOpcion.no_se_lleno;
             bool flag = false; //para saber si se pudo meter todo lo de la localidad o no, false es que si, true es que no
-            int volumen_aux = 0;
-            int peso_aux = 0;
+           
 
 
             //camion elegido -> camioneta
@@ -899,22 +903,22 @@ namespace sol_greedy_dinamica
 
                 for (int i = 0; i < pedidos_del_dia.Count; i++)//recorro toda la lista 
                 {
-                    if (volumen_aux < camion.volumen_max) //si el volumen que voy sumando de los productos que voy metiendo al camion no supera al volumen total, mismo pensamiento con el peso
+                    if (volypeso[0] < camion.volumen_max) //si el volumen que voy sumando de los productos que voy metiendo al camion no supera al volumen total, mismo pensamiento con el peso
                     {
-                        if ((volumen_aux + pedidos_del_dia[i].volumen) < camion.volumen_max && pedidos_del_dia[i].barrio == localidad)
+                        if ((volypeso[0] + pedidos_del_dia[i].volumen) < camion.volumen_max && pedidos_del_dia[i].barrio == localidad)
                         {
                             if (Verifical_electro_pequeño(pedidos_del_dia[i]) == true && camion.elevador == false)
                             {
-                                volumen_aux = volumen_aux + pedidos_del_dia[i].volumen + Constants.volumen_elevador;
-                                peso_aux = peso_aux + pedidos_del_dia[i].peso_pedido + Constants.peso_elevador;
+                                volypeso[0] = volypeso[0] + pedidos_del_dia[i].volumen + Constants.volumen_elevador;
+                                volypeso[1] = volypeso[1] + pedidos_del_dia[i].peso_pedido + Constants.peso_elevador;
                                 pedido_a_entregar.Add(pedidos_del_dia[i]);
                                 pedidos_del_dia.RemoveAt(i);
                                 camion.elevador = true;
                             }
                             else
                             {
-                                volumen_aux = volumen_aux + pedidos_del_dia[i].volumen;
-                                peso_aux = peso_aux + pedidos_del_dia[i].peso_pedido;
+                                volypeso[0] = volypeso[0] + pedidos_del_dia[i].volumen;
+                                volypeso[1] = volypeso[1] + pedidos_del_dia[i].peso_pedido;
                                 pedido_a_entregar.Add(pedidos_del_dia[i]);
                                 pedidos_del_dia.RemoveAt(i);
                             }
@@ -926,7 +930,7 @@ namespace sol_greedy_dinamica
                         }
                     }
                 }
-                if (volumen_aux >= (camion.volumen_max - Constants.volumen_electro_pequeños) && flag == false) //si no queda mucho espacio , ni siquiera para que entre una pedido chico mas y aparte nunca estuvo en la situcion de que no entro un pedido de la localidad
+                if (volypeso[0] >= (camion.volumen_max - Constants.volumen_electro_pequeños) && flag == false) //si no queda mucho espacio , ni siquiera para que entre una pedido chico mas y aparte nunca estuvo en la situcion de que no entro un pedido de la localidad
                     estado = eOpcion.se_lleno_completo_;
 
                 return estado;
@@ -936,9 +940,9 @@ namespace sol_greedy_dinamica
 
                 for (int i = 0; i < pedidos_del_dia.Count; i++)
                 {
-                    if (volumen_aux < camion.volumen_max && peso_aux < camion.peso_max)
+                    if (volypeso[0] < camion.volumen_max && volypeso[1] < camion.peso_max)
                     {
-                        if ((volumen_aux + pedidos_del_dia[i].volumen) < camion.volumen_max && (peso_aux + pedidos_del_dia[i].peso_pedido) < camion.peso_max && pedidos_del_dia[i].barrio == localidad)
+                        if ((volypeso[0] + pedidos_del_dia[i].volumen) < camion.volumen_max && (volypeso[1] + pedidos_del_dia[i].peso_pedido) < camion.peso_max && pedidos_del_dia[i].barrio == localidad)
                         {
                             if (Cantidad_Televisores(pedidos_del_dia[i]) > 0)
                             {
@@ -950,16 +954,16 @@ namespace sol_greedy_dinamica
 
                             if (Verifical_electro_pequeño(pedidos_del_dia[i]) == true && camion.elevador == false)
                             {
-                                volumen_aux = volumen_aux + pedidos_del_dia[i].volumen + Constants.volumen_elevador;
-                                peso_aux = peso_aux + pedidos_del_dia[i].peso_pedido + Constants.peso_elevador;
+                                volypeso[0] = volypeso[0] + pedidos_del_dia[i].volumen + Constants.volumen_elevador;
+                                volypeso[1] = volypeso[1] + pedidos_del_dia[i].peso_pedido + Constants.peso_elevador;
                                 pedido_a_entregar.Add(pedidos_del_dia[i]);
                                 pedidos_del_dia.RemoveAt(i);
                                 camion.elevador = true;
                             }
                             else
                             {
-                                volumen_aux = volumen_aux + pedidos_del_dia[i].volumen;
-                                peso_aux = peso_aux + pedidos_del_dia[i].peso_pedido;
+                                volypeso[0] = volypeso[0] + pedidos_del_dia[i].volumen;
+                                volypeso[1] = volypeso[1] + pedidos_del_dia[i].peso_pedido;
                                 pedido_a_entregar.Add(pedidos_del_dia[i]);
                                 pedidos_del_dia.RemoveAt(i);
                             }
@@ -975,7 +979,7 @@ namespace sol_greedy_dinamica
 
 
 
-                    if (volumen_aux >= (camion.volumen_max - Constants.volumen_electro_pequeños) && flag == false) //si el camion se lleno y no tuvo problema de que no entro algo de la localidad
+                    if (volypeso[0] >= (camion.volumen_max - Constants.volumen_electro_pequeños) && flag == false) //si el camion se lleno y no tuvo problema de que no entro algo de la localidad
                         estado = eOpcion.se_lleno_completo_;
 
                     return estado;
@@ -986,9 +990,9 @@ namespace sol_greedy_dinamica
 
                 for (int i = 0; i < pedidos_del_dia.Count; i++)
                 {
-                    if (volumen_aux < camion.volumen_max && peso_aux < camion.peso_max)
+                    if (volypeso[0] < camion.volumen_max && volypeso[1] < camion.peso_max)
                     {
-                        if ((volumen_aux + pedidos_del_dia[i].volumen) < camion.volumen_max && (peso_aux + pedidos_del_dia[i].peso_pedido) < camion.peso_max && pedidos_del_dia[i].barrio == localidad)
+                        if ((volypeso[0] + pedidos_del_dia[i].volumen) < camion.volumen_max && (volypeso[1] + pedidos_del_dia[i].peso_pedido) < camion.peso_max && pedidos_del_dia[i].barrio == localidad)
                         {
                             if (Cantidad_Televisores(pedidos_del_dia[i]) > 0)
                             {
@@ -998,8 +1002,8 @@ namespace sol_greedy_dinamica
                                 //una vez que ya esta actualizado el nuevo volumen, sigo como el resto de los pedidos sin televisor
                             }
 
-                            volumen_aux = volumen_aux + pedidos_del_dia[i].volumen;
-                            peso_aux = peso_aux + pedidos_del_dia[i].peso_pedido;
+                            volypeso[0] = volypeso[0] + pedidos_del_dia[i].volumen;
+                            volypeso[1] = volypeso[1] + pedidos_del_dia[i].peso_pedido;
                             pedido_a_entregar.Add(pedidos_del_dia[i]);
                             pedidos_del_dia.RemoveAt(i);
 
@@ -1011,7 +1015,7 @@ namespace sol_greedy_dinamica
                         }
                     }
                 }
-                if (volumen_aux >= (camion.volumen_max - Constants.volumen_electro_pequeños) && flag == false) //si el camion se lleno y no tuvo problema de que no entro algo de la localidad
+                if (volypeso[0] >= (camion.volumen_max - Constants.volumen_electro_pequeños) && flag == false) //si el camion se lleno y no tuvo problema de que no entro algo de la localidad
                     estado = eOpcion.se_lleno_completo_;
 
                 return estado;
@@ -1020,13 +1024,13 @@ namespace sol_greedy_dinamica
 
         }
 
-        static void rellenar_camion(List<eLocalidad> lista_localidades_normal, List<cPedido_por_Cliente> pedido_a_entregar, List<cPedido_por_Cliente> pedidos_del_dia_normales, cVehiculo camion)
+        static void rellenar_camion(List<int> volypeso,List<eLocalidad> lista_localidades_normal, List<cPedido_por_Cliente> pedido_a_entregar, List<cPedido_por_Cliente> pedidos_del_dia_normales, cVehiculo camion)
         {
             eOpcion chequeo_camion_lleno = eOpcion.no_se_lleno;
 
             while (chequeo_camion_lleno == eOpcion.no_se_lleno && lista_localidades_normal != null)
             { //mientras que el camion no este lleno o mientras siga habiendo locaclidades que recorrer
-                chequeo_camion_lleno = intento_llenar_camion(lista_localidades_normal[0], pedidos_del_dia_normales, camion, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
+                chequeo_camion_lleno = intento_llenar_camion(volypeso,lista_localidades_normal[0], pedidos_del_dia_normales, camion, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
 
                 if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
                     lista_localidades_normal.RemoveAt(0);

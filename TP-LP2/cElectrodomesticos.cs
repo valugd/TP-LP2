@@ -40,7 +40,7 @@ namespace sol_greedy_dinamica
         {
             this.volumen=volumen_;
             this.tipo = obj;
-            this.pesoobjeto = peso;
+            this.peso = peso_;
             this.garantia = garantia_;
 
         }

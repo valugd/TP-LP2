@@ -39,11 +39,11 @@ internal class Program
 
     static void Main(string[] args)
     {
-        //cVehiculo camioneta = new cCamioneta(80, 2,5770000);
-        //cVehiculo furgon = new cFurgon(90, 4,3950000);
-        //cVehiculo furgoneta = new cFurgoneta(60, 9,2800000);
+        cVehiculo camioneta = new cCamioneta(2,80,5770000);
+        cVehiculo furgon = new cFurgon(4,90, 3950000);
+        cVehiculo furgoneta = new cFurgoneta(9,60, 2800000);
 
-        //List<cVehiculo> lista_camiones_definitiva = new List<cVehiculo>() { camioneta, furgon, furgoneta };
+        List<cVehiculo> lista_camiones = new List<cVehiculo>() { camioneta, furgon, furgoneta };
 
         //List<cVehiculo> lista_de_camiones_diaria = new List<cVehiculo>();
         //DateTime dia_hoy = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
@@ -51,43 +51,61 @@ internal class Program
         //lista_de_camiones_diaria = camiones_disponibles(dia_hoy, lista_camiones_definitiva);
 
 
+        cElectrodomesticos licuadora = new cPequeños_electrodomesticos(30, 4, 2, objetos.licuadora);
+        cElectrodomesticos rallador = new cPequeños_electrodomesticos(10, 1, 2, objetos.rallador);
+        cElectrodomesticos exprimidor= new cPequeños_electrodomesticos(10, 3, 2, objetos.exprimidor);
+        cElectrodomesticos cafetera = new cPequeños_electrodomesticos(50, 4, 2, objetos.cafetera);
+        cElectrodomesticos tostadora = new cPequeños_electrodomesticos(60, 5, 2, objetos.tostadora);
+        cElectrodomesticos cocina = new cLineaBlanca(70, 40, 4, objetos.cocinas);
+        cElectrodomesticos calefon = new cLineaBlanca(90, 30, 2, objetos.calefon);
+        cElectrodomesticos termotanque = new cLineaBlanca(80, 20, 3, objetos.termotanque);
+        cElectrodomesticos lavarropas = new cLineaBlanca(40, 60, 1, objetos.lavarropas);
+        cElectrodomesticos secarropas = new cLineaBlanca(30, 60, 2, objetos.lavarropas);
+        cElectrodomesticos comptadora = new cElectronicos(10, 10, 2, objetos.computadoras);
+        cElectrodomesticos impresora = new cElectronicos(20, 20, 3, objetos.impresoras);
+        cElectrodomesticos accesorios = new cElectronicos(10, 5, 1, objetos.accesorios);
+        cElectrodomesticos televisor = new cTelevisores(10, 30, 2, objetos.telvisores);
 
+        List<cElectrodomesticos> lista_taylor = new List<cElectrodomesticos>();
+        lista_taylor.Add(licuadora);
+        lista_taylor.Add(televisor);
+        lista_taylor.Add(exprimidor);
+        List<cElectrodomesticos> lista_sabrina= new List<cElectrodomesticos>();
+        lista_sabrina.Add(rallador);
+        lista_sabrina.Add(cafetera);
+        List<cElectrodomesticos> lista_olivia = new List<cElectrodomesticos>();
+        lista_olivia.Add(cocina);
+         lista_olivia.Add(termotanque);
+        lista_olivia.Add(comptadora);
+        lista_olivia.Add(impresora);
+        List<cElectrodomesticos> lista_harry = new List<cElectrodomesticos>();
+        lista_harry.Add(calefon);
+        lista_harry.Add(lavarropas);
+        List<cElectrodomesticos> lista_louis = new List<cElectrodomesticos>();
+        lista_louis.Add(secarropas);
+        lista_louis.Add(accesorios);
 
-        //electrodomesticos cafetera = new cafetera(2, 4, "philips", 2, eTipoProducto.linea_blanca);
-        //List<electrodomesticos> lista_taylor = new List<electrodomesticos>();
-        //lista_taylor.Add(cafetera(12,1,"marca",7));
-        //lista_taylor.Add(objetos.computadoras);
-        //lista_taylor.Add(objetos.exprimidor);
-        //List<objetos> lista_sabrina= new List<objetos>();
-        //lista_sabrina.Add(objetos.licuadora);
-        //lista_sabrina.Add(objetos.secarropas);
-        //List<objetos> lista_olivia = new List<objetos>();
-        //lista_olivia.Add(objetos.tostadora);
-        //lista_olivia.Add(objetos.cafetera);
-        //lista_olivia.Add(objetos.cocinas);
-        //lista_olivia.Add(objetos.heladera);
-        //List<objetos> lista_harry = new List<objetos>();
-        //lista_harry.Add(objetos.computadoras);
-        //lista_harry.Add(objetos.accesorios);
-        //List<objetos> lista_louis = new List<objetos>();
-        //lista_louis.Add(objetos.impresoras);
-        //lista_louis.Add(objetos.accesorios);
-        //lista_louis.Add(objetos.cafetera);
-        //List<objetos> lista_ricardo = new List<objetos>();
-        //lista_ricardo.Add(objetos.cocinas);
-        //lista_ricardo.Add(objetos.rallador);
-        //lista_ricardo.Add(objetos.telvisores);
-        //lista_ricardo.Add(objetos.telvisores);
-        //pedido_por_cliente pedido1 = new pedido_por_cliente("Taylor Swift", eLocalidad.VicenteLopez,lista_taylor , entrega.express);
-        //pedido_por_cliente pedido2 = new pedido_por_cliente("Sabrina Carpenter", eLocalidad.LaBoca,lista_sabrina , entrega.diferido);
-        //pedido_por_cliente pedido3 = new pedido_por_cliente("Olivia Rodrigo", eLocalidad.Palermo, lista_olivia, entrega.normal);
-        //pedido_por_cliente pedido4 = new pedido_por_cliente("Harry Styles", eLocalidad.Caballito,lista_harry , entrega.express);
-        //pedido_por_cliente pedido5 = new pedido_por_cliente("Louis Tomlinson", eLocalidad.Chacarita,lista_louis , entrega.normal);
-        //pedido_por_cliente pedido6 = new pedido_por_cliente("Ricardo Fort", eLocalidad.PuertoMadero,lista_ricardo , entrega.express);
+        cPedido_por_Cliente pedido1 = new cPedido_por_Cliente("Taylor Swift", eLocalidad.VicenteLopez,lista_taylor , entrega.express);
+        cPedido_por_Cliente pedido2 = new cPedido_por_Cliente("Sabrina Carpenter", eLocalidad.LaBoca,lista_sabrina , entrega.express);
+        cPedido_por_Cliente pedido3 = new cPedido_por_Cliente("Olivia Rodrigo", eLocalidad.Palermo, lista_olivia, entrega.express);
+        cPedido_por_Cliente pedido4 = new cPedido_por_Cliente("Harry Styles", eLocalidad.Caballito,lista_harry , entrega.express);
+        cPedido_por_Cliente pedido5 = new cPedido_por_Cliente("Louis Tomlinson", eLocalidad.Chacarita,lista_louis , entrega.express);
+
+        List<cPedido_por_Cliente> lista_pedidos = new List<cPedido_por_Cliente>();
+        lista_pedidos.Add(pedido1);
+        lista_pedidos.Add(pedido2);
+        lista_pedidos.Add(pedido3);
+        lista_pedidos.Add(pedido4);
+        lista_pedidos.Add(pedido5);
+
+        cCosiMundo cosimundo = new cCosiMundo(lista_pedidos, lista_camiones);
+
+        cosimundo.preparo_y_desapacho_de_productos();
+
         // System.Threading.Thread.Sleep(5);
 
 
-        
+
         //int dia_hoy_chequeo = DateTime.Now.Day;
         //if(dia_hoy_chequeo==1)//si hoy es 1, es que empezo un nuevo mes
         //{
