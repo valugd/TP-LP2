@@ -220,54 +220,13 @@ namespace sol_greedy_dinamica
             List<int> volypeso = new List<int> { 0, 0 };
             List<eLocalidad> camino_mas_corto = new List<eLocalidad>();
 
-            if (lista_localidades_express.Count== 0) //si no hay mas localidades express, es decir ya recorri todas las express, sigo con los pedidos normales
-            {
-                while (chequeo_camion_lleno == eOpcion.no_se_lleno && lista_localidades_normal != null)
-                { //mientras que el camion no este lleno o mientras siga habiendo locaclidades que recorrer
-                    chequeo_camion_lleno = intento_llenar_camion(volypeso,lista_localidades_normal[0], pedidos_del_dia_normales, camion, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
-
-                    if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
-                        lista_localidades_normal.RemoveAt(0);
-
-                }
-
-
-                int barrios_a_recorrer = Barrios_en_pedido_del_dia(pedido_a_entregar); //la cantidad de barrios que se lograron meter en el camion
-                List<eLocalidad> lista_localidades = Lista_Barrios_Ordenada(pedido_a_entregar);
-                int[,] matriz = new int[barrios_a_recorrer, barrios_a_recorrer];
-                matriz = llenar_matriz_con_distancias(lista_localidades, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer
-
-                camino_mas_corto = encontrar_camino_mas_corto_greedy(matriz, barrios_a_recorrer, lista_localidades);
-
-
-            }
-            else
-            {
-                //si todavia hay pedidos express para entregar
-                while (chequeo_camion_lleno == eOpcion.no_se_lleno && lista_localidades_express.Count != 0)
-                { //mientras haya locaclidades express que recorrer y el camion este vacio
-
-                    chequeo_camion_lleno = intento_llenar_camion(volypeso,lista_localidades_express[0], pedidos_del_dia_express, camion, pedido_a_entregar);
-
-                    if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
-                        lista_localidades_express.RemoveAt(0);
-
-                    //si despues de poner lo ultimo en el camion de lo express este no se lleno, lo relleno con productos de tipo entrega normal
-                    if (lista_localidades_express.Count == 0 && lista_localidades_normal.Count != 0 && chequeo_camion_lleno == eOpcion.no_se_lleno)
-                        rellenar_camion(volypeso,lista_localidades_normal, pedido_a_entregar, pedidos_del_dia_normales, camion);
-                    //llenamos el camion con los pedidos normales de las zonas mas cercanas a liniers -> eliminamos esas localidades de la lista ya directamente adentro de la funcion, al igual que los pedidos incluidos
-                }
-
-                int barrios_a_recorrer = Barrios_en_pedido_del_dia(pedido_a_entregar);
+          //llamado funcion prgramacion dinamica
+             int barrios_a_recorrer = Barrios_en_pedido_del_dia(pedido_a_entregar);
                 int[,] matriz = new int[barrios_a_recorrer, barrios_a_recorrer];
                 List<eLocalidad> lista_localidades = Lista_Barrios_Ordenada(pedido_a_entregar);
                 matriz = llenar_matriz_con_distancias(lista_localidades, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer
 
                 camino_mas_corto = encontrar_camino_mas_corto_greedy(matriz, barrios_a_recorrer, lista_localidades); //encontramos el camino mas corto para recorrer todos los barrios de los pedidos que entraron en el camion
-
-
-
-            }
 
 
             //despues de pasar por los if, ya tengo la lista de pedidos a entregar y la lista de barrios a recorrer en orden 
@@ -279,6 +238,7 @@ namespace sol_greedy_dinamica
 
 
         }
+       
         static List<cPedido_por_Cliente> Ordenar_por_pedidio(List<eLocalidad> camino_mas_corto, List<cPedido_por_Cliente> pedido_a_entregar)
         {
             List<cPedido_por_Cliente> pedidos_ordenados = new List<cPedido_por_Cliente>();
@@ -305,27 +265,7 @@ namespace sol_greedy_dinamica
 
         }
 
-        //static void Ordenar_por_prioridad_pedido(List<cPedido_por_Cliente> lista)
-        //{
-        //    //primero ordena por express y luego normales y luego diferidos
-        //    List<cPedido_por_Cliente> aux = new List<cPedido_por_Cliente>();
-        //    for (int i = 0; i < lista.Count; i++)
-        //    {
-        //        if (lista[i].tipo_entrega == entrega.express)
-        //        {
-        //            //meto el pedido express a la lista auxiliar y la elimino de la original
-        //            aux.Add(lista[i]);
-        //            lista.RemoveAt(i);
-        //        }
-        //    }
-        //    //para cuando salga del for, voy a tener en la lista aux solo los pedidos express y en la lista original los normales, ahora agrego los normales a la lista auxiliar (al final)
-        //    for (int i = 0; i < lista.Count; i++)
-        //    {
-        //        aux.Add(lista[i]);
-        //    }
 
-        //    lista = aux; //ahora la lista esta ordenada por primero express y despues normales
-        //}
         static void llenado_despacho_productos(cVehiculo camion, List<cPedido_por_Cliente> lista_completa_pedidos)
         {
             //lista pedidos esta fltrada por solo las zonas que estan en el recorrido y primero estan puestos los del envio express, esto lo hacemos desde las funciones en donde llamamos a esta funcion, es por esto que siempre agarramos la posicion 0, porque vamos eliminando al primero despues de meterlo al camion -> siempre el primero de la lista es el que tenemos que meter primero
