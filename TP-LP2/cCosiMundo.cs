@@ -30,27 +30,28 @@ namespace sol_greedy_dinamica
 
         public void preparo_y_desapacho_de_productos()
         {
-            //filtramos la lista completa pasada por parametro en listas de las localidades con pedidos express y normales, y los pedidos express y normales
-            List<cPedido_por_Cliente> pedidos_del_dia_express = Filtrar_por_pedido(this.lista_pedidos, entrega.express);
-            List<eLocalidad> lista_localidades_express = Lista_Barrios_Ordenada(pedidos_del_dia_express);
-
-            List<cPedido_por_Cliente> pedidos_del_dia_normales = Filtrar_por_pedido(this.lista_pedidos, entrega.normal);
-            List<eLocalidad> lista_localidades_normal = Lista_Barrios_Ordenada(pedidos_del_dia_normales);
-
+            
             List<cPedido_por_Cliente> pedido_a_entregar = new List<cPedido_por_Cliente>();
 
 
             cVehiculo camion = this.lista_camiones.ElementAt(0); //siempre empezamos con la camioneta
             int cont_camiones = 0;
             int max_viajes = max_viajes_por_dia();
-            while (cont_camiones < max_viajes && (pedidos_del_dia_express.Count != 0 || pedidos_del_dia_normales.Count != 0))
+            while (cont_camiones < max_viajes && this.lista_pedidos.Count != 0 )
             {//hasta que no haya mas camiones o haya despachado todos los productos
-                despacho_de_productos(lista_localidades_normal, pedidos_del_dia_express, pedidos_del_dia_normales, lista_localidades_express, pedido_a_entregar, camion); //calculo el mejor camino, y despacho todos los paquetes posibles, dandole prioridad a los express
+                despacho_de_productos(this.lista_pedidos, pedido_a_entregar, camion); //calculo el mejor camino, y despacho todos los paquetes posibles, dandole prioridad a los express
                 cont_camiones++;//se lleno el camion anterior, uso el siguiente
                 if (cont_camiones == 4) //seguimos con el furgon
+                {
                     camion = this.lista_camiones.ElementAt(1);
+                    CambiarVolumenTelevisoresFurgon();
+                }
                 if (cont_camiones == 5)//seguimos con la furgoneta
+                {
                     camion = this.lista_camiones.ElementAt(2);
+                    CambiarVolumenTelevisoresFurgoneta();
+                }
+                    
                 pedido_a_entregar.RemoveRange(0, pedido_a_entregar.Count); //como los vamos entregando, borro la lista porque ya salio el camion
 
             }
@@ -67,6 +68,44 @@ namespace sol_greedy_dinamica
             return viajes;
         }
 
+        public int Cantidad_Televisores(cPedido_por_Cliente pedido_del_dia)
+        {
+            int cont = 0;
+            for (int i = 0; i < pedido_del_dia.cantidad_objetos; i++)
+            {
+                if (pedido_del_dia.compra_objetos[i].GetType() == typeof(cTelevisores))//si el objeto es un televisor
+                    cont++;
+            }
+            return cont;
+        }
+        public void CambiarVolumenTelevisoresFurgoneta()
+        {
+            for (int i = 0; i < this.listaPedidos.Count; i++)
+            {
+                if (Cantidad_Televisores(this.listaPedidos[i]) > 0)
+                {
+                    this.listaPedidos[i].volumen_pedido_set = this.listaPedidos[i].volumen - Constants.televisores; //le restamos el volumen del televisor al volumen total del pedido
+                    int nuevo_volumen = 2 * 1 * 3; //ancho y profundidad del televisor pero alto del furgoneta
+                    this.listaPedidos[i].volumen_pedido_set = this.listaPedidos[i].volumen + nuevo_volumen;
+                    //una vez que ya esta actualizado el nuevo volumen, sigo como el resto de los pedidos sin televisor
+                }
+            }
+        }
+        public void CambiarVolumenTelevisoresFurgon()
+        {
+            for (int i = 0; i < this.listaPedidos.Count; i++)
+            {
+                if (Cantidad_Televisores(this.listaPedidos[i]) > 0)
+                {
+                    this.listaPedidos[i].volumen_pedido_set = this.listaPedidos[i].volumen - Constants.televisores; //le restamos el volumen del televisor al volumen total del pedido
+                    int nuevo_volumen = 2 * 1 * 4; //ancho y profundidad del televisor pero alto del furgon
+                    this.listaPedidos[i].volumen_pedido_set = this.listaPedidos[i].volumen + nuevo_volumen;
+                    //una vez que ya esta actualizado el nuevo volumen, sigo como el resto de los pedidos sin televisor
+                }
+            }
+        }
+
+
         static int numero_de_posicion_barrio(eLocalidad barrio_elegido, List<eLocalidad> lista_localidad)
         {
             int pos = 0;
@@ -78,7 +117,7 @@ namespace sol_greedy_dinamica
             return pos;
         }
 
-        static int chequeo_verificacion_barrios(bool[] verificacion_barrios)
+        public int chequeo_verificacion_barrios(bool[] verificacion_barrios)
         {
             // devuelve -> 1 si llegaste al final (todos los barrios fueron recorridos), 0 si no llegaste al final (falta mas de un barrio por recorrer) y -1 si falta un barrio (solo falta un barrio por recorrer), -2 si no se recorrio ningun barrio todavia
 
@@ -98,7 +137,7 @@ namespace sol_greedy_dinamica
                 return 0; //falta mas de un barrio por recorrer
         }
 
-        static int Barrios_en_pedido_del_dia(List<cPedido_por_Cliente> lista_pedido)
+        public int Barrios_en_pedido_del_dia(List<cPedido_por_Cliente> lista_pedido)
         {
             List<cPedido_por_Cliente> aux = new List<cPedido_por_Cliente>();
             for (int i = 0; i < lista_pedido.Count; i++)
@@ -115,7 +154,7 @@ namespace sol_greedy_dinamica
                 for (int h = i; h < lista_pedido.Count; h++)
                 {//cuento solo una vez (con ayuda del flag) al barrio y todos los clientes que encuentre que van al mismo barrio los elimino de la lista auxiliar
                  //notar que la lista original no se modifica, solo la auxiliar
-                    if ( flag == false)
+                    if (flag == false)
                     {
                         flag = true;
                         cont++;
@@ -127,7 +166,7 @@ namespace sol_greedy_dinamica
             return cont;
         }
 
-        static int calcular_distancia_barrio_a_liniers(eLocalidad barrioo)
+        public int calcular_distancia_barrio_a_liniers(eLocalidad barrioo)
         {
             int dist = 0;
             switch (barrioo)
@@ -161,7 +200,7 @@ namespace sol_greedy_dinamica
             return dist;
         }
 
-        static int min_distancia(int[,] matriz, int pos, bool[] verificacion_barrios, int barrios, List<eLocalidad> orden_clientes, List<eLocalidad> lista_localidad)
+        public int min_distancia(int[,] matriz, int pos, bool[] verificacion_barrios, int barrios, List<eLocalidad> orden_clientes, List<eLocalidad> lista_localidad)
         {
             int min = Constants.max_index; //le pongo un valor muy alto, para que la primera vez que compare con la distancia de una localidad 
             int i = 0;
@@ -214,32 +253,33 @@ namespace sol_greedy_dinamica
             return min;
         }
 
-        static void despacho_de_productos(List<eLocalidad> lista_localidades_normal, List<cPedido_por_Cliente> pedidos_del_dia_express, List<cPedido_por_Cliente> pedidos_del_dia_normales, List<eLocalidad> lista_localidades_express, List<cPedido_por_Cliente> pedido_a_entregar, cVehiculo camion)
+        public void despacho_de_productos(List<cPedido_por_Cliente> pedidos_del_dia,  List<cPedido_por_Cliente> pedido_a_entregar, cVehiculo camion)
         {//las listas de localidades estan ordenadas por orden de menor distancia a liniers a mayor
-            eOpcion chequeo_camion_lleno = eOpcion.no_se_lleno;
-            List<int> volypeso = new List<int> { 0, 0 };
+            
+            
             List<eLocalidad> camino_mas_corto = new List<eLocalidad>();
 
-          //llamado funcion prgramacion dinamica
-             int barrios_a_recorrer = Barrios_en_pedido_del_dia(pedido_a_entregar);
-                int[,] matriz = new int[barrios_a_recorrer, barrios_a_recorrer];
-                List<eLocalidad> lista_localidades = Lista_Barrios_Ordenada(pedido_a_entregar);
-                matriz = llenar_matriz_con_distancias(lista_localidades, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer
+            LLenadoDinamicoDelCamion(camion, pedidos_del_dia, pedido_a_entregar);
 
-                camino_mas_corto = encontrar_camino_mas_corto_greedy(matriz, barrios_a_recorrer, lista_localidades); //encontramos el camino mas corto para recorrer todos los barrios de los pedidos que entraron en el camion
+            int barrios_a_recorrer = Barrios_en_pedido_del_dia(pedido_a_entregar);
+            int[,] matriz = new int[barrios_a_recorrer, barrios_a_recorrer];
+            List<eLocalidad> lista_localidades = Lista_Barrios_Ordenada(pedido_a_entregar);
+            matriz = llenar_matriz_con_distancias(lista_localidades, barrios_a_recorrer); //me va a llenar la matriz con las distancias entre cada pueblo que voy a recorrer
+
+            camino_mas_corto = encontrar_camino_mas_corto_greedy(matriz, barrios_a_recorrer, lista_localidades); //encontramos el camino mas corto para recorrer todos los barrios de los pedidos que entraron en el camion
 
 
             //despues de pasar por los if, ya tengo la lista de pedidos a entregar y la lista de barrios a recorrer en orden 
             //primero ordena por barrio, poniendo primero a los del primer barrio a recorrer y después los del último barrio. 
-            pedido_a_entregar= Ordenar_por_pedidio(camino_mas_corto, pedido_a_entregar);
+            pedido_a_entregar = Ordenar_por_pedidio(camino_mas_corto, pedido_a_entregar);
 
             llenado_despacho_productos(camion, pedido_a_entregar); //esta funcion me va a llenar el camión que yo le pase por parámetro, con los pedidos de las localidades seleccionadas
 
 
 
         }
-       
-        static List<cPedido_por_Cliente> Ordenar_por_pedidio(List<eLocalidad> camino_mas_corto, List<cPedido_por_Cliente> pedido_a_entregar)
+
+        public List<cPedido_por_Cliente> Ordenar_por_pedidio(List<eLocalidad> camino_mas_corto, List<cPedido_por_Cliente> pedido_a_entregar)
         {
             List<cPedido_por_Cliente> pedidos_ordenados = new List<cPedido_por_Cliente>();
             List<cPedido_por_Cliente> aux = new List<cPedido_por_Cliente>();
@@ -265,75 +305,7 @@ namespace sol_greedy_dinamica
 
         }
 
-
-        static void llenado_despacho_productos(cVehiculo camion, List<cPedido_por_Cliente> lista_completa_pedidos)
-        {
-            //lista pedidos esta fltrada por solo las zonas que estan en el recorrido y primero estan puestos los del envio express, esto lo hacemos desde las funciones en donde llamamos a esta funcion, es por esto que siempre agarramos la posicion 0, porque vamos eliminando al primero despues de meterlo al camion -> siempre el primero de la lista es el que tenemos que meter primero
-            Queue<cPedido_por_Cliente> pedidos_a_entregar = new Queue<cPedido_por_Cliente>(); //cola donde vamos a ir poniendo los pedidos FIRST IN -> FIRST OUT
-            int volumen_aux = 0;
-            int peso_aux = 0;
-
-            if (camion.GetType() == typeof(cCamioneta))//si el camion seleccionado es la camioneta
-            {//las camionetas no tiene limite de peso, solo de volumen
-                while (volumen_aux < camion.volumen_max) //mientras que el volumen que tiene sea menor que el max de la camioneta
-                {
-                    if (lista_completa_pedidos.Count!=0 && volumen_aux + lista_completa_pedidos[0].volumen <= camion.volumen_max) //cheque que si le sumo el paquete siguiente no supere el volumen total.
-                    {
-                        pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]); //lo agregamos a la cola
-                        volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen; //sumamos el volumen
-                        lista_completa_pedidos.RemoveAt(0); //sacamos a ese pedido de la lista
-                       
-                    }
-                    else
-                        volumen_aux = camion.volumen_max;//si ya sumandole el prox paquete, supero el peso del camion, le impongo que el peso es el max para que salga del while
-
-                }
-            }
-            else if (camion.GetType() == typeof(cFurgon)) //el camion seleccionado es el furgon
-            {//en este caso chequeamos tanto el volumen total y el peso total 
-                while (volumen_aux < camion.volumen_max && peso_aux < camion.peso_max)
-                {
-                    if (lista_completa_pedidos.Count != 0 && volumen_aux + lista_completa_pedidos[0].volumen < camion.volumen_max && (peso_aux + lista_completa_pedidos[0].peso_pedido) < camion.peso_max)
-                    {
-                        pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]);
-                        volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen;
-                        peso_aux = peso_aux + lista_completa_pedidos[0].peso_pedido;
-                        lista_completa_pedidos.RemoveAt(0);
-                       
-                    }
-                    else
-                    {
-                        volumen_aux = camion.volumen_max;
-                        peso_aux = camion.peso_max;
-                    }
-
-
-                }
-            }
-            else //cont es igual a 5 -> furgoneta
-            {//en este caso chequeamos tanto el volumen total y el peso total
-                while (volumen_aux < camion.volumen_max && peso_aux < camion.peso_max)
-                {
-                    if (lista_completa_pedidos.Count != 0 && volumen_aux + lista_completa_pedidos[0].volumen < camion.volumen_max && (peso_aux + lista_completa_pedidos[0].peso_pedido) < camion.peso_max)
-                    {
-                        pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]);
-                        volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen;
-                        peso_aux = peso_aux + lista_completa_pedidos[0].peso_pedido;
-                        lista_completa_pedidos.RemoveAt(0);
-                        
-                    }
-                    else
-                    {
-                        volumen_aux = camion.volumen_max;
-                        peso_aux = camion.peso_max;
-                    }
-
-
-                }
-            }
-        }
-
-        static List<cPedido_por_Cliente> Filtrar_por_pedido(List<cPedido_por_Cliente> pedidos_del_dia_, entrega tipo_entrega)
+        public List<cPedido_por_Cliente> Filtrar_por_pedido(List<cPedido_por_Cliente> pedidos_del_dia_, entrega tipo_entrega)
         {
             List<cPedido_por_Cliente> aux = new List<cPedido_por_Cliente>();
 
@@ -345,50 +317,7 @@ namespace sol_greedy_dinamica
             return aux;
         }
 
-        static List<eLocalidad> Lista_Barrios_Ordenada(List<cPedido_por_Cliente> pedidos_del_dia_tipo_de_pedido)
-        {
-
-            List<eLocalidad> aux = new List<eLocalidad>();
-            //primero meto todos los barrios de todos los pedidos en una lista, no importa si ya puse ese barrio antes
-            for (int i = 0; i < pedidos_del_dia_tipo_de_pedido.Count; i++)
-            {
-                aux.Add(pedidos_del_dia_tipo_de_pedido[i].barrio);
-            }
-
-            //ahora saco los repetidos
-            for (int i = 0; i < pedidos_del_dia_tipo_de_pedido.Count; i++)
-            {
-                
-                    for (int j = 1; j < pedidos_del_dia_tipo_de_pedido.Count; j++)
-                    {
-                        if (aux.ElementAt(i) == aux.ElementAt(j) && i !=j)
-                            aux.RemoveAt(j);
-                    }
-                
-            }
-
-            //ahora aux tiene la lista de localidades 
- 
-            for (int x = 0; x < aux.Count; x++)
-            {
-
-                for (int y = 0; y < aux.Count - 1; y++)
-                {
-
-                    // Si el actual es mayor que el que le sigue a la derecha...
-                    if (calcular_distancia_barrio_a_liniers(aux.ElementAt(y)) > calcular_distancia_barrio_a_liniers(aux.ElementAt(y + 1)))
-                    { //distancia liniers es una funcion que le pasas una localidad y te pasa la distancia de esa localidad a liniers
-                        eLocalidad temporal = aux.ElementAt(y);
-                        aux[y] =aux.ElementAt(y + 1);
-                        aux[y+1] = temporal;
-                    }
-                }
-            }
-            //ahora aux esta ordenado, con el barrio con la distancia minima a liniers en la primer posicion y el barrio mas alejado en la ultima posicion
-            return aux;
-        }
-
-        static int[,] llenar_matriz_con_distancias(List<eLocalidad> lista_localidades, int barrios)
+        public int[,] llenar_matriz_con_distancias(List<eLocalidad> lista_localidades, int barrios)
         {
 
             //esta es la matriz que ya esta predeterminada, tiene todas las distancias de cada localidad a localidad
@@ -417,7 +346,6 @@ namespace sol_greedy_dinamica
             List<int> list_puertomadero = new List<int>() { 10, 15, 8 };
             List<int> list_laboca = new List<int>() { 3, 13 };
             //charcarita ->14
-
             int pos = 0;
             for (int i = 0; i < 25; i++)
             {
@@ -741,7 +669,6 @@ namespace sol_greedy_dinamica
                         break;
                 }
             }
-
             //llenarla
 
 
@@ -769,10 +696,155 @@ namespace sol_greedy_dinamica
 
 
             return matriz_distancias;
-
         }
 
-        static int num_asignado_barrio(eLocalidad localidad)
+        public List<eLocalidad> Lista_Barrios_Ordenada(List<cPedido_por_Cliente> pedidos_del_dia_tipo_de_pedido)
+        {
+
+            List<eLocalidad> aux = new List<eLocalidad>();
+            //primero meto todos los barrios de todos los pedidos en una lista, no importa si ya puse ese barrio antes
+            for (int i = 0; i < pedidos_del_dia_tipo_de_pedido.Count; i++)
+            {
+                aux.Add(pedidos_del_dia_tipo_de_pedido[i].barrio);
+            }
+
+            //ahora saco los repetidos
+            for (int i = 0; i < pedidos_del_dia_tipo_de_pedido.Count; i++)
+            {
+
+                for (int j = 1; j < pedidos_del_dia_tipo_de_pedido.Count; j++)
+                {
+                    if (aux.ElementAt(i) == aux.ElementAt(j) && i != j)
+                        aux.RemoveAt(j);
+                }
+
+            }
+
+            //ahora aux tiene la lista de localidades 
+
+            for (int x = 0; x < aux.Count; x++)
+            {
+
+                for (int y = 0; y < aux.Count - 1; y++)
+                {
+
+                    // Si el actual es mayor que el que le sigue a la derecha...
+                    if (calcular_distancia_barrio_a_liniers(aux.ElementAt(y)) > calcular_distancia_barrio_a_liniers(aux.ElementAt(y + 1)))
+                    { //distancia liniers es una funcion que le pasas una localidad y te pasa la distancia de esa localidad a liniers
+                        eLocalidad temporal = aux.ElementAt(y);
+                        aux[y] = aux.ElementAt(y + 1);
+                        aux[y + 1] = temporal;
+                    }
+                }
+            }
+            //ahora aux esta ordenado, con el barrio con la distancia minima a liniers en la primer posicion y el barrio mas alejado en la ultima posicion
+            return aux;
+        }
+
+        public List<eLocalidad> encontrar_camino_mas_corto_greedy(int[,] matriz, int barrios_a_recorrer, List<eLocalidad> localidades_en_orden_matriz)
+        {
+            List<eLocalidad> orden_clientes = new List<eLocalidad>(); //donde vamos a guardar la lista de los barios en orden de ls barrios que tenemos que recorrer
+            bool[] verificacion_barrios = new bool[barrios_a_recorrer]; //vector de bool que vamos a usar para saber si un barrio fue recorrido o no, si esta en true (ya lo recorrimos)
+            int h = 0; //para ir llenando orden a clientes
+            int i = 0;
+            for (int j = 0; j < barrios_a_recorrer; j++)
+            {
+                verificacion_barrios[j] = false;
+            }
+            //para calcular el camino -> el mejor camino ¡¡en el momento!! -> algortimo de djkistra
+            while (chequeo_verificacion_barrios(verificacion_barrios) != 1) //funcion que me devuelve si ya todos los barrios fueron recorridos o no -> 1 si llegaste al final, 0 si no llegaste al final y -1 si falta un barrio
+            {
+                int min = min_distancia(matriz, i, verificacion_barrios, barrios_a_recorrer, orden_clientes, localidades_en_orden_matriz);//la funcion me devuelve la distancia minima que va a hacer el camion para ir de un barrio a otro (con este algoritmo va a ir eligiendo siempre la dist minima entre barrio y barrio)
+                                                                                                                                          // tambien la funcion min_distancia me llena la lista orden_clientes poniendome en la pos h el barrio a recorrer, eLocalidad
+                i = numero_de_posicion_barrio(orden_clientes.ElementAt(h), localidades_en_orden_matriz); //ahora i va a ser de donde sale el camion, es por eso que apenas entramos al while, es 0, porque siempre sale de liniers, y por eso agarra la ult pos de la lista que va guardando los barrios en orden, pero como orden cliente es eLocalidad, la funcion numero de posicion barrrio te pasa en que posicion de la matriz esta el barrio que recien se recorrio
+                h++;
+            }
+            return orden_clientes;
+        }
+
+        public void llenado_despacho_productos(cVehiculo camion, List<cPedido_por_Cliente> lista_completa_pedidos)
+        {
+            //lista pedidos esta fltrada por solo las zonas que estan en el recorrido y primero estan puestos los del envio express, esto lo hacemos desde las funciones en donde llamamos a esta funcion, es por esto que siempre agarramos la posicion 0, porque vamos eliminando al primero despues de meterlo al camion -> siempre el primero de la lista es el que tenemos que meter primero
+            Queue<cPedido_por_Cliente> pedidos_a_entregar = new Queue<cPedido_por_Cliente>(); //cola donde vamos a ir poniendo los pedidos FIRST IN -> FIRST OUT
+            int volumen_aux = 0;
+            int peso_aux = 0;
+
+            if (camion.GetType() == typeof(cCamioneta))//si el camion seleccionado es la camioneta
+            {//las camionetas no tiene limite de peso, solo de volumen
+                while (volumen_aux < camion.volumen_max) //mientras que el volumen que tiene sea menor que el max de la camioneta
+                {
+                    if (lista_completa_pedidos.Count != 0 && volumen_aux + lista_completa_pedidos[0].volumen <= camion.volumen_max) //cheque que si le sumo el paquete siguiente no supere el volumen total.
+                    {
+                        pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]); //lo agregamos a la cola
+                        volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen; //sumamos el volumen
+                        lista_completa_pedidos.RemoveAt(0); //sacamos a ese pedido de la lista
+
+                    }
+                    else
+                        volumen_aux = camion.volumen_max;//si ya sumandole el prox paquete, supero el peso del camion, le impongo que el peso es el max para que salga del while
+
+                }
+            }
+            else if (camion.GetType() == typeof(cFurgon)) //el camion seleccionado es el furgon
+            {//en este caso chequeamos tanto el volumen total y el peso total 
+                while (volumen_aux < camion.volumen_max && peso_aux < camion.peso_max)
+                {
+                    if (lista_completa_pedidos.Count != 0 && volumen_aux + lista_completa_pedidos[0].volumen < camion.volumen_max && (peso_aux + lista_completa_pedidos[0].peso_pedido) < camion.peso_max)
+                    {
+                        pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]);
+                        volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen;
+                        peso_aux = peso_aux + lista_completa_pedidos[0].peso_pedido;
+                        lista_completa_pedidos.RemoveAt(0);
+
+                    }
+                    else
+                    {
+                        volumen_aux = camion.volumen_max;
+                        peso_aux = camion.peso_max;
+                    }
+
+
+                }
+            }
+            else //cont es igual a 5 -> furgoneta
+            {//en este caso chequeamos tanto el volumen total y el peso total
+                while (volumen_aux < camion.volumen_max && peso_aux < camion.peso_max)
+                {
+                    if (lista_completa_pedidos.Count != 0 && volumen_aux + lista_completa_pedidos[0].volumen < camion.volumen_max && (peso_aux + lista_completa_pedidos[0].peso_pedido) < camion.peso_max)
+                    {
+                        pedidos_a_entregar.Enqueue(lista_completa_pedidos[0]);
+                        volumen_aux = volumen_aux + lista_completa_pedidos[0].volumen;
+                        peso_aux = peso_aux + lista_completa_pedidos[0].peso_pedido;
+                        lista_completa_pedidos.RemoveAt(0);
+
+                    }
+                    else
+                    {
+                        volumen_aux = camion.volumen_max;
+                        peso_aux = camion.peso_max;
+                    }
+
+
+                }
+            }
+        }
+
+        public int[] ValorDeCadaPedido(List<cPedido_por_Cliente> lista)
+        {
+            int[] valores = new int[lista.Count];
+            for (int i = 0; i < lista.Count; i++)
+            {
+                if (lista[i].tipo_entrega == entrega.express)
+                    valores[i] = lista[i].volumen / lista[i].peso_pedido + 10;
+                else if (lista[i].tipo_entrega == entrega.express)
+                    valores[i] = valores[i] = lista[i].volumen / lista[i].peso_pedido + 5;
+                else
+                    valores[i] = lista[i].volumen / lista[i].peso_pedido;
+            }
+            return valores;
+        }
+
+        public int num_asignado_barrio(eLocalidad localidad)
         {
             switch (localidad)
             {
@@ -805,192 +877,66 @@ namespace sol_greedy_dinamica
             return -1;
         }
 
-        static List<eLocalidad> encontrar_camino_mas_corto_greedy(int[,] matriz, int barrios_a_recorrer, List<eLocalidad> localidades_en_orden_matriz)
-        {
-            List<eLocalidad> orden_clientes = new List<eLocalidad>(); //donde vamos a guardar la lista de los barios en orden de ls barrios que tenemos que recorrer
-            bool[] verificacion_barrios = new bool[barrios_a_recorrer]; //vector de bool que vamos a usar para saber si un barrio fue recorrido o no, si esta en true (ya lo recorrimos)
-            int h = 0; //para ir llenando orden a clientes
-            int i = 0;
-            for (int j = 0; j < barrios_a_recorrer; j++)
-            {
-                verificacion_barrios[j] = false;
-            }
-            //para calcular el camino -> el mejor camino ¡¡en el momento!! -> algortimo de djkistra
-            while (chequeo_verificacion_barrios(verificacion_barrios) != 1) //funcion que me devuelve si ya todos los barrios fueron recorridos o no -> 1 si llegaste al final, 0 si no llegaste al final y -1 si falta un barrio
-            {
-                int min = min_distancia(matriz, i, verificacion_barrios, barrios_a_recorrer, orden_clientes, localidades_en_orden_matriz);//la funcion me devuelve la distancia minima que va a hacer el camion para ir de un barrio a otro (con este algoritmo va a ir eligiendo siempre la dist minima entre barrio y barrio)
-                                                                                                                                          // tambien la funcion min_distancia me llena la lista orden_clientes poniendome en la pos h el barrio a recorrer, eLocalidad
-                i = numero_de_posicion_barrio(orden_clientes.ElementAt(h), localidades_en_orden_matriz); //ahora i va a ser de donde sale el camion, es por eso que apenas entramos al while, es 0, porque siempre sale de liniers, y por eso agarra la ult pos de la lista que va guardando los barrios en orden, pero como orden cliente es eLocalidad, la funcion numero de posicion barrrio te pasa en que posicion de la matriz esta el barrio que recien se recorrio
-                h++;
-            }
-            return orden_clientes;
-        }
-
-        static eOpcion intento_llenar_camion(List<int> volypeso,eLocalidad localidad, List<cPedido_por_Cliente> pedidos_del_dia, cVehiculo camion, List<cPedido_por_Cliente> pedido_a_entregar)
+        public void LLenadoDinamicoDelCamion(cVehiculo camion, List<cPedido_por_Cliente> pedidos_del_dia, List<cPedido_por_Cliente> pedido_a_entregar)
         {
 
-            //llena el camion con los pedidos de la locacalidad pasada como paremetro, si logra llenar con todos los pedidos de la localidad y sigue habiendo espacio, devuelve que no se lleno. Si logra poner TODOS los pedidos de la localidad y no queda espacio, es decir, el volumen que ya lleno el camion es igual o mayor que el volumen total sin la caja mas pequeña de entrega entonces devuelvo que se llenó completo
-            //si mientras lo lleno hay un pedido que no puedo meter de la locaclidad porque ya superaria el peso o volumen total del camion, devuelvo que se lleno pero que quedaron cosas de la locacalidad sin poner. Igualmente, auqnue no va a poner el pedido que agregandolo superaria el volumen/peso maximo va a seguir buscando a ver si puede meter otro pedido de menor volumen o peso al camion
-            //de esta manera, el camion siempre va a salir lo mas lleno posible
-            eOpcion estado = eOpcion.no_se_lleno;
-            bool flag = false; //para saber si se pudo meter todo lo de la localidad o no, false es que si, true es que no
-           
+            int[] valor = ValorDeCadaPedido(pedidos_del_dia);
 
+            int i, w;
+            int acumvolumen = 0;
+            int[,] K = new int[pedidos_del_dia.Count + 1, 1000 + 1];
 
-            //camion elegido -> camioneta
-            if (camion.GetType() == typeof(cCamioneta))
+            bool flag;
+            for (i = 0; i <= pedidos_del_dia.Count; i++)
             {
+                flag = false;
 
-                for (int i = 0; i < pedidos_del_dia.Count; i++)//recorro toda la lista 
+                for (w = 0; w <= 1000; w++)
                 {
-                    if (volypeso[0] < camion.volumen_max) //si el volumen que voy sumando de los productos que voy metiendo al camion no supera al volumen total, mismo pensamiento con el peso
+
+                    if (i == 0 || w == 0)
+                        K[i, w] = 0;
+                    else if (pedidos_del_dia[i - 1].peso_pedido <= w && acumvolumen + pedidos_del_dia[i - 1].volumen <= 2000)
                     {
-                        if ((volypeso[0] + pedidos_del_dia[i].volumen) < camion.volumen_max && pedidos_del_dia[i].barrio == localidad)
+                        if (flag == false)
                         {
-                            if (Verifical_electro_pequeño(pedidos_del_dia[i]) == true && camion.elevador == false)
-                            {
-                                volypeso[0] = volypeso[0] + pedidos_del_dia[i].volumen + Constants.volumen_elevador;
-                                volypeso[1] = volypeso[1] + pedidos_del_dia[i].peso_pedido + Constants.peso_elevador;
-                                pedido_a_entregar.Add(pedidos_del_dia[i]);
-                                pedidos_del_dia.RemoveAt(i);
-                                camion.elevador = true;
-                            }
-                            else
-                            {
-                                volypeso[0] = volypeso[0] + pedidos_del_dia[i].volumen;
-                                volypeso[1] = volypeso[1] + pedidos_del_dia[i].peso_pedido;
-                                pedido_a_entregar.Add(pedidos_del_dia[i]);
-                                pedidos_del_dia.RemoveAt(i);
-                            }
-                        }
-                        else if (pedidos_del_dia[i].barrio == localidad) //si no entra en el camion pero es de la localidad, siginifica que ya va ahaber un paquete que no voy a meter que va a estra en el prox camion 
-                        {
+                            acumvolumen = acumvolumen + pedidos_del_dia[i - 1].volumen;
                             flag = true;
-                            estado = eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad;
                         }
+
+                        K[i, w] = Math.Max(valor[i - 1] + K[i - 1, w - pedidos_del_dia[i - 1].peso_pedido], K[i - 1, w]);
+
                     }
+                    else
+                        K[i, w] = K[i - 1, w];
                 }
-                if (volypeso[0] >= (camion.volumen_max - Constants.volumen_electro_pequeños) && flag == false) //si no queda mucho espacio , ni siquiera para que entre una pedido chico mas y aparte nunca estuvo en la situcion de que no entro un pedido de la localidad
-                    estado = eOpcion.se_lleno_completo_;
-
-                return estado;
             }
-            else if (camion.GetType() == typeof(cFurgon)) // camion elegido->furgon
-            {
 
-                for (int i = 0; i < pedidos_del_dia.Count; i++)
+            int res = K[pedidos_del_dia.Count, 1000];
+            i = pedidos_del_dia.Count;
+            int j = 1000;
+
+            while (i > 0 && j > 0)
+            {
+                if (K[i, j] == K[i - 1, j])
                 {
-                    if (volypeso[0] < camion.volumen_max && volypeso[1] < camion.peso_max)
-                    {
-                        if ((volypeso[0] + pedidos_del_dia[i].volumen) < camion.volumen_max && (volypeso[1] + pedidos_del_dia[i].peso_pedido) < camion.peso_max && pedidos_del_dia[i].barrio == localidad)
-                        {
-                            if (Cantidad_Televisores(pedidos_del_dia[i]) > 0)
-                            {
-                                pedidos_del_dia[i].volumen_pedido_set = pedidos_del_dia[i].volumen - Constants.televisores; //le restamos el volumen del televisor al volumen total del pedido
-                                int nuevo_volumen = 2 * 1 * 4; //ancho y profundidad del televisor pero alto del furgon
-                                pedidos_del_dia[i].volumen_pedido_set = pedidos_del_dia[i].volumen + nuevo_volumen;
-                                //una vez que ya esta actualizado el nuevo volumen, sigo como el resto de los pedidos sin televisor
-                            }
+                    i--;
+                    continue;
 
-                            if (Verifical_electro_pequeño(pedidos_del_dia[i]) == true && camion.elevador == false)
-                            {
-                                volypeso[0] = volypeso[0] + pedidos_del_dia[i].volumen + Constants.volumen_elevador;
-                                volypeso[1] = volypeso[1] + pedidos_del_dia[i].peso_pedido + Constants.peso_elevador;
-                                pedido_a_entregar.Add(pedidos_del_dia[i]);
-                                pedidos_del_dia.RemoveAt(i);
-                                camion.elevador = true;
-                            }
-                            else
-                            {
-                                volypeso[0] = volypeso[0] + pedidos_del_dia[i].volumen;
-                                volypeso[1] = volypeso[1] + pedidos_del_dia[i].peso_pedido;
-                                pedido_a_entregar.Add(pedidos_del_dia[i]);
-                                pedidos_del_dia.RemoveAt(i);
-                            }
-                        }
-
-
-                    }
-                    else if (pedidos_del_dia[i].barrio == localidad) //si no entra en el camion pero es de la localidad 
-                    {
-                        flag = true;
-                        estado = eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad;
-                    }
-
-
-
-                    if (volypeso[0] >= (camion.volumen_max - Constants.volumen_electro_pequeños) && flag == false) //si el camion se lleno y no tuvo problema de que no entro algo de la localidad
-                        estado = eOpcion.se_lleno_completo_;
-
-                    return estado;
                 }
-            }
-            else //se elegio la furgoneta
-            {
-
-                for (int i = 0; i < pedidos_del_dia.Count; i++)
+                else
                 {
-                    if (volypeso[0] < camion.volumen_max && volypeso[1] < camion.peso_max)
-                    {
-                        if ((volypeso[0] + pedidos_del_dia[i].volumen) < camion.volumen_max && (volypeso[1] + pedidos_del_dia[i].peso_pedido) < camion.peso_max && pedidos_del_dia[i].barrio == localidad)
-                        {
-                            if (Cantidad_Televisores(pedidos_del_dia[i]) > 0)
-                            {
-                                pedidos_del_dia[i].volumen_pedido_set = pedidos_del_dia[i].volumen - Constants.televisores; //le restamos el volumen del televisor al volumen total del pedido
-                                int nuevo_volumen = 2 * 1 * 3; //ancho y profundidad del televisor pero alto del furgoneta
-                                pedidos_del_dia[i].volumen_pedido_set = pedidos_del_dia[i].volumen + nuevo_volumen;
-                                //una vez que ya esta actualizado el nuevo volumen, sigo como el resto de los pedidos sin televisor
-                            }
-
-                            volypeso[0] = volypeso[0] + pedidos_del_dia[i].volumen;
-                            volypeso[1] = volypeso[1] + pedidos_del_dia[i].peso_pedido;
-                            pedido_a_entregar.Add(pedidos_del_dia[i]);
-                            pedidos_del_dia.RemoveAt(i);
-
-                        }
-                        else if (pedidos_del_dia[i].barrio == localidad) //si no entra en el camion pero es de la localidad 
-                        {
-                            flag = true;
-                            estado = eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad;
-                        }
-                    }
+                    pedido_a_entregar.Add(pedidos_del_dia[i - 1]);
+                    j = j - pedidos_del_dia[i - 1].peso_pedido;
+                    pedidos_del_dia.RemoveAt(i - 1);
+                    i--;
                 }
-                if (volypeso[0] >= (camion.volumen_max - Constants.volumen_electro_pequeños) && flag == false) //si el camion se lleno y no tuvo problema de que no entro algo de la localidad
-                    estado = eOpcion.se_lleno_completo_;
-
-                return estado;
             }
-            return eOpcion.se_lleno_completo_; //porque sino tira error, la idea es q nunca llegue aca
 
         }
 
-        static void rellenar_camion(List<int> volypeso,List<eLocalidad> lista_localidades_normal, List<cPedido_por_Cliente> pedido_a_entregar, List<cPedido_por_Cliente> pedidos_del_dia_normales, cVehiculo camion)
-        {
-            eOpcion chequeo_camion_lleno = eOpcion.no_se_lleno;
-
-            while (chequeo_camion_lleno == eOpcion.no_se_lleno && lista_localidades_normal != null)
-            { //mientras que el camion no este lleno o mientras siga habiendo locaclidades que recorrer
-                chequeo_camion_lleno = intento_llenar_camion(volypeso,lista_localidades_normal[0], pedidos_del_dia_normales, camion, pedido_a_entregar); //mete los pedidos que van entrando en pedido_a_entregar
-
-                if (chequeo_camion_lleno != eOpcion.se_lleno_pero_quedaron_cosas_de_la_localidad) //si se pudo meter todos los pedidos de esa locaclidad, la elimino porque ya no la van a tenr que recorrer 
-                    lista_localidades_normal.RemoveAt(0);
-
-            }
-            //va a voler al main con la lista de pedidos a entregar agregando algunos pedidos normales, y si se lograron poner localidades enteras de pedidos normales, tamb los saca de la lista y va a voler al main la lista actualizada
-        }
-
-        static int Cantidad_Televisores(cPedido_por_Cliente pedido_del_dia)
-        {
-            int cont = 0;
-            for (int i = 0; i < pedido_del_dia.cantidad_objetos; i++)
-            {
-                if (pedido_del_dia.compra_objetos[i].GetType() == typeof(cTelevisores))//si el objeto es un televisor
-                    cont++;
-            }
-            return cont;
-        }
-
-        static bool Verifical_electro_pequeño(cPedido_por_Cliente pedido_del_dia)
+      
+        public bool Verifical_electro_pequeño(cPedido_por_Cliente pedido_del_dia)
         {
             int cont = 0;
             for (int i = 0; i < pedido_del_dia.cantidad_objetos; i++)
@@ -1005,7 +951,7 @@ namespace sol_greedy_dinamica
                 return false;
         }
 
-         static void verificar_devaluacion_camiones(List<cVehiculo> lista_camiones_def)
+        public void verificar_devaluacion_camiones(List<cVehiculo> lista_camiones_def)
         {
             //sabemos en el pos0 esta la camioneta, en la pos1 el furgon y en la pos2 la furgoneta
             for (int i = 0; i < lista_camiones_def.Count; i++)
@@ -1018,7 +964,6 @@ namespace sol_greedy_dinamica
                 }
             }
         }
-
 
         public List<cVehiculo> camiones_disponibles(DateTime dia_hoy, List<cVehiculo> camiones_empresa)
         {
@@ -1055,7 +1000,7 @@ namespace sol_greedy_dinamica
             return vector_camiones;
         }
 
-        static void sumar_mes_camiones(List<cVehiculo> lista_camiones)
+        public void sumar_mes_camiones(List<cVehiculo> lista_camiones)
         {
             for (int i = 0; i < 3; i++)
             {
@@ -1065,9 +1010,8 @@ namespace sol_greedy_dinamica
         }
 
 
-        ~cCosiMundo() { }
-
-
 
     }
-}
+
+    }
+
